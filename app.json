@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Constancy",
+    "slug": "constancy",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "constancy",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B2545",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B2545"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.foculab.constancy"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0B2545"
+      },
+      "package": "com.foculab.constancy"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#22C55E"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
