@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen } from '../../src/components/Screen';
 import { Card } from '../../src/components/Card';
+import { Eyebrow } from '../../src/components/Eyebrow';
 import { useStore } from '../../src/store/useStore';
 import { slotLabel } from '../../src/lib/personalization';
 import { colors, font } from '../../src/theme/tokens';
@@ -26,10 +27,12 @@ export default function Profile() {
 
   return (
     <Screen>
-      <Text style={styles.eyebrow}>SEU PERFIL</Text>
-      <Text style={styles.title}>Como o app te{'\n'}enxerga.</Text>
+      <View>
+        <Eyebrow text="Seu Perfil" />
+        <Text style={styles.title}>Como o app{'\n'}te enxerga.</Text>
+      </View>
 
-      <Card>
+      <Card padding={6}>
         <Row label="Objetivo" value={goalLabel} />
         <Divider />
         <Row label="Momento crítico" value={slotLabel(profile.lossSlot ?? 'afternoon')} />
@@ -39,35 +42,25 @@ export default function Profile() {
         <Row label="Frasco" value={`${profile.bottleSize} cápsulas`} />
       </Card>
 
-      <Card variant="accent">
-        <Text style={styles.sectionLabel}>— SEUS DADOS</Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-          <Stat label="Check-ins" value={checkIns.length} />
-          <Stat label="Registros cápsula" value={constancyLog.length} />
-        </View>
-      </Card>
+      <View style={{ flexDirection: 'row', gap: 10 }}>
+        <StatCard label="Check-ins" value={checkIns.length} />
+        <StatCard label="Cápsulas" value={constancyLog.filter((l) => l.taken).length} />
+      </View>
 
-      <Pressable onPress={() => router.push('/content')}>
-        <Card style={styles.linkRow}>
-          <Text style={styles.linkText}>Conteúdo personalizado</Text>
-          <Text style={styles.chev}>›</Text>
-        </Card>
-      </Pressable>
+      <LinkRow label="Conteúdo personalizado" onPress={() => router.push('/content')} />
+      <LinkRow label="Fazer check-in" onPress={() => router.push('/check-in')} />
 
-      <Pressable onPress={() => router.push('/check-in')}>
-        <Card style={styles.linkRow}>
-          <Text style={styles.linkText}>Fazer check-in</Text>
-          <Text style={styles.chev}>›</Text>
-        </Card>
-      </Pressable>
-
-      <Pressable onPress={reset} style={{ padding: 12, alignItems: 'center' }}>
+      <Pressable onPress={reset} style={{ padding: 14, alignItems: 'center' }}>
         <Text style={styles.danger}>Resetar onboarding</Text>
       </Pressable>
 
-      <Text style={styles.footer}>
-        CONSTANCY <Text style={{ color: colors.textDim }}>by FOCULAB</Text>
-      </Text>
+      <View style={{ alignItems: 'center', gap: 6, marginTop: 8 }}>
+        <View style={styles.dot} />
+        <Text style={styles.brandFooter}>
+          CONSTANCY <Text style={{ color: colors.textDim }}>by FOCULAB</Text>
+        </Text>
+        <Text style={styles.tag}>Constância é uma escolha diária.</Text>
+      </View>
     </Screen>
   );
 }
@@ -85,48 +78,70 @@ function Divider() {
   return <View style={styles.divider} />;
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <View>
+    <Card style={{ flex: 1 }}>
       <Text style={styles.statVal}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
+      <Text style={styles.statLabel}>{label.toUpperCase()}</Text>
+    </Card>
+  );
+}
+
+function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress}>
+      <Card style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={styles.linkText}>{label}</Text>
+        <View style={styles.chevWrap}>
+          <Text style={styles.chev}>›</Text>
+        </View>
+      </Card>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  eyebrow: { color: colors.green, fontSize: 10, letterSpacing: 2, fontWeight: '800' },
   title: {
     color: colors.textLight,
-    fontSize: 30,
+    fontSize: 36,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 36,
-    marginTop: 6,
+    lineHeight: 40,
+    marginTop: 10,
+    letterSpacing: -0.5,
   },
-  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 14 },
   rowLabel: { color: colors.textMuted, fontSize: 13 },
   rowValue: { color: colors.textLight, fontSize: 14, fontWeight: '700' },
-  divider: { height: 1, backgroundColor: colors.navyBorder },
-  sectionLabel: { color: colors.green, fontSize: 10, letterSpacing: 2, fontWeight: '800' },
-  statVal: { color: colors.textLight, fontSize: 26, fontWeight: '900' },
+  divider: { height: 1, backgroundColor: colors.navyBorder, marginHorizontal: 14 },
+  statVal: { color: colors.textLight, fontSize: 28, fontWeight: '900', letterSpacing: -1 },
   statLabel: {
     color: colors.textMuted,
-    fontSize: 10,
-    letterSpacing: 1.5,
-    fontWeight: '700',
-    marginTop: 2,
-  },
-  linkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  linkText: { color: colors.textLight, fontSize: 15, fontWeight: '700' },
-  chev: { color: colors.green, fontSize: 22 },
-  danger: { color: colors.danger, fontSize: 13, fontWeight: '700' },
-  footer: {
-    color: colors.green,
-    textAlign: 'center',
-    fontSize: 11,
-    letterSpacing: 3,
+    fontSize: 9,
+    letterSpacing: 1.8,
     fontWeight: '800',
-    marginTop: 20,
+    marginTop: 4,
+  },
+  linkText: { color: colors.textLight, fontSize: 15, fontWeight: '700' },
+  chevWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(34,197,94,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(34,197,94,0.25)',
+  },
+  chev: { color: colors.green, fontSize: 18 },
+  danger: { color: colors.danger, fontSize: 12, fontWeight: '800', letterSpacing: 1.5 },
+  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.green },
+  brandFooter: { color: colors.textLight, fontSize: 11, letterSpacing: 3, fontWeight: '800' },
+  tag: {
+    color: colors.textDim,
+    fontFamily: font.serif,
+    fontStyle: 'italic',
+    fontSize: 13,
+    marginTop: 4,
   },
 });

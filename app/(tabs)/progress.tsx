@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Screen } from '../../src/components/Screen';
 import { Card } from '../../src/components/Card';
+import { Eyebrow } from '../../src/components/Eyebrow';
 import { Calendar } from '../../src/components/Calendar';
 import { Bars } from '../../src/components/Bars';
 import { useStore } from '../../src/store/useStore';
@@ -31,47 +32,67 @@ export default function ProgressScreen() {
 
   return (
     <Screen>
-      <Text style={styles.eyebrow}>MARÇO · DADOS REAIS</Text>
-      <Text style={styles.title}>Seu progresso</Text>
-      <Text style={styles.sub}>{cap(monthName())}</Text>
+      <View>
+        <Eyebrow text={`${cap(monthName())} · Dados Reais`} />
+        <Text style={styles.title}>Seu progresso</Text>
+        <Text style={styles.sub}>Sem vaidade. Sem peso. Só o que importa.</Text>
+      </View>
 
-      <Card>
+      <Card padding={22}>
         <Calendar days={days} />
       </Card>
 
       <View style={{ flexDirection: 'row', gap: 10 }}>
-        <Stat label="SEQUÊNCIA ATUAL" value={streak} unit="d" />
-        <Stat label="TAXA DO MÊS" value={rate} unit="%" />
-        <Stat label="RECORDE" value={best} unit="d" />
+        <Stat label="Sequência" value={streak} unit="d" highlight />
+        <Stat label="Taxa do mês" value={rate} unit="%" />
+        <Stat label="Recorde" value={best} unit="d" />
       </View>
 
       <Card variant="accent">
-        <Text style={styles.insightLabel}>✦ INSIGHT DA SEMANA</Text>
+        <View style={styles.insightHead}>
+          <Text style={styles.insightSpark}>✦</Text>
+          <Text style={styles.insightLabel}>INSIGHT DA SEMANA</Text>
+        </View>
         <Text style={styles.insight}>{insight}</Text>
       </Card>
 
       <View>
-        <Text style={styles.sectionLabel}>CONSISTÊNCIA POR DIA</Text>
-        <Card>
-          <Bars data={bars} />
-        </Card>
+        <Eyebrow text="Consistência por dia" />
+        <View style={{ marginTop: 12 }}>
+          <Card>
+            <Bars data={bars} />
+          </Card>
+        </View>
       </View>
 
-      <Text style={styles.quote}>
-        "Constância é uma escolha diária. E escolhas diárias precisam de suporte."
-      </Text>
+      <View style={styles.quoteWrap}>
+        <View style={styles.quoteLine} />
+        <Text style={styles.quote}>
+          "Constância é uma escolha diária.{'\n'}E escolhas diárias precisam de suporte."
+        </Text>
+      </View>
     </Screen>
   );
 }
 
-function Stat({ label, value, unit }: { label: string; value: number; unit: string }) {
+function Stat({
+  label,
+  value,
+  unit,
+  highlight,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  highlight?: boolean;
+}) {
   return (
-    <Card style={{ flex: 1, alignItems: 'flex-start' }}>
-      <Text style={styles.statVal}>
-        {value}
+    <Card variant={highlight ? 'accent' : 'dark'} style={{ flex: 1, alignItems: 'flex-start' }} padding={16}>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+        <Text style={[styles.statVal, highlight && { color: colors.green }]}>{value}</Text>
         <Text style={styles.statUnit}>{unit}</Text>
-      </Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      </View>
+      <Text style={styles.statLabel}>{label.toUpperCase()}</Text>
     </Card>
   );
 }
@@ -81,48 +102,45 @@ function cap(s: string) {
 }
 
 const styles = StyleSheet.create({
-  eyebrow: { color: colors.green, fontSize: 10, letterSpacing: 2, fontWeight: '800' },
   title: {
     color: colors.textLight,
-    fontSize: 32,
+    fontSize: 38,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    marginTop: 6,
+    fontWeight: '500',
+    marginTop: 10,
+    letterSpacing: -0.5,
   },
-  sub: { color: colors.textMuted, fontSize: 13, marginTop: 2, marginBottom: 8 },
-  statVal: { color: colors.textLight, fontSize: 32, fontWeight: '900' },
-  statUnit: { color: colors.textMuted, fontSize: 14, fontWeight: '700' },
+  sub: { color: colors.textMuted, fontSize: 13, marginTop: 6, lineHeight: 20 },
+  statVal: { color: colors.textLight, fontSize: 30, fontWeight: '900', letterSpacing: -1 },
+  statUnit: { color: colors.textMuted, fontSize: 13, fontWeight: '800', marginLeft: 2 },
   statLabel: {
     color: colors.textMuted,
     fontSize: 9,
-    letterSpacing: 1.5,
-    fontWeight: '700',
-    marginTop: 4,
+    letterSpacing: 1.8,
+    fontWeight: '800',
+    marginTop: 6,
   },
-  insightLabel: { color: colors.green, fontSize: 11, letterSpacing: 2, fontWeight: '800' },
+  insightHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  insightSpark: { color: colors.green, fontSize: 14 },
+  insightLabel: { color: colors.green, fontSize: 11, letterSpacing: 2.5, fontWeight: '800' },
   insight: {
     color: colors.textLight,
-    fontSize: 15,
-    lineHeight: 23,
-    marginTop: 10,
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 12,
     fontFamily: font.serif,
     fontStyle: 'italic',
   },
-  sectionLabel: {
-    color: colors.textMuted,
-    fontSize: 10,
-    letterSpacing: 2,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
+  quoteWrap: { alignItems: 'center', marginTop: 8, gap: 12 },
+  quoteLine: { width: 30, height: 1.5, backgroundColor: colors.green },
   quote: {
     color: colors.textMuted,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    fontSize: 14,
+    fontSize: 15,
     textAlign: 'center',
-    marginTop: 8,
-    paddingHorizontal: 20,
-    lineHeight: 22,
+    lineHeight: 24,
+    paddingHorizontal: 10,
   },
 });

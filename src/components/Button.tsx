@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, Text, StyleSheet, ViewStyle, ActivityIndicator } from 'react-native';
-import { colors, radius, shadow } from '../theme/tokens';
+import { Pressable, Text, StyleSheet, ViewStyle, ActivityIndicator, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, radius, shadow, gradients } from '../theme/tokens';
 
 type Variant = 'primary' | 'ghost' | 'outline';
 
@@ -11,65 +12,83 @@ type Props = {
   loading?: boolean;
   disabled?: boolean;
   style?: ViewStyle;
+  icon?: string;
 };
 
-export function Button({ label, onPress, variant = 'primary', loading, disabled, style }: Props) {
-  const v = variantStyle(variant);
+export function Button({ label, onPress, variant = 'primary', loading, disabled, style, icon }: Props) {
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.base,
-        v.container,
         variant === 'primary' && shadow.glow,
-        (disabled || loading) && { opacity: 0.55 },
+        (disabled || loading) && { opacity: 0.5 },
         pressed && { transform: [{ scale: 0.98 }] },
         style,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator color={v.label.color as string} />
-      ) : (
-        <Text style={[styles.label, v.label]}>{label}</Text>
+      {variant === 'primary' && (
+        <LinearGradient
+          colors={gradients.cta}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill as any}
+        />
       )}
+      {variant === 'outline' && (
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            { borderRadius: radius.pill, borderWidth: 1, borderColor: colors.navyBorderHi },
+          ]}
+        />
+      )}
+      {variant === 'ghost' && (
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            { borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.05)' },
+          ]}
+        />
+      )}
+      <View style={styles.inner}>
+        {loading ? (
+          <ActivityIndicator color={variant === 'primary' ? '#06240F' : colors.textLight} />
+        ) : (
+          <>
+            {icon && <Text style={[styles.icon, labelColor(variant)]}>{icon}</Text>}
+            <Text style={[styles.label, labelColor(variant)]}>{label}</Text>
+          </>
+        )}
+      </View>
     </Pressable>
   );
 }
 
-function variantStyle(v: Variant) {
-  switch (v) {
-    case 'primary':
-      return {
-        container: { backgroundColor: colors.green },
-        label: { color: '#06240F' },
-      };
-    case 'outline':
-      return {
-        container: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.navyBorder },
-        label: { color: colors.textLight },
-      };
-    case 'ghost':
-    default:
-      return {
-        container: { backgroundColor: 'rgba(255,255,255,0.06)' },
-        label: { color: colors.textLight },
-      };
-  }
+function labelColor(v: Variant) {
+  return { color: v === 'primary' ? '#06240F' : colors.textLight };
 }
 
 const styles = StyleSheet.create({
   base: {
-    paddingVertical: 16,
-    paddingHorizontal: 22,
     borderRadius: radius.pill,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  inner: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
   },
   label: {
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 1.8,
     textTransform: 'uppercase',
   },
+  icon: { fontSize: 14, fontWeight: '700' },
 });

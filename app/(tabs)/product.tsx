@@ -1,9 +1,11 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Screen } from '../../src/components/Screen';
 import { Card } from '../../src/components/Card';
 import { Donut } from '../../src/components/Donut';
+import { Eyebrow } from '../../src/components/Eyebrow';
 import { useStore } from '../../src/store/useStore';
-import { colors, font } from '../../src/theme/tokens';
+import { colors, font, radius, shadow, gradients } from '../../src/theme/tokens';
 
 const COMPOSITION = [
   { color: '#22C55E', name: 'Cromo', tag: 'metabolismo' },
@@ -28,51 +30,76 @@ export default function Product() {
   return (
     <Screen>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Sua{'\n'}cápsula</Text>
+        <View style={{ flex: 1 }}>
+          <Eyebrow text="Seu Frasco" />
+          <Text style={styles.title}>Sua{'\n'}cápsula.</Text>
+        </View>
         <View style={[styles.badge, tookToday ? styles.badgeOn : styles.badgeOff]}>
-          <Text style={[styles.badgeText, tookToday ? styles.badgeTextOn : styles.badgeTextOff]}>
-            {tookToday ? 'Tomada hoje ✓' : 'Ainda não'}
+          <View style={[styles.badgeDot, { backgroundColor: tookToday ? colors.green : colors.textDim }]} />
+          <Text style={[styles.badgeText, { color: tookToday ? colors.green : colors.textMuted }]}>
+            {tookToday ? 'Tomada hoje' : 'Ainda não'}
           </Text>
         </View>
       </View>
 
-      <Card>
+      <Card variant="hero" padding={24}>
         <View style={styles.bottleRow}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.bottleLabel}>CÁPSULAS RESTANTES</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 4 }}>
+            <Eyebrow text="Cápsulas Restantes" />
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 10 }}>
               <Text style={styles.bottleBig}>{remaining}</Text>
               <Text style={styles.bottleSmall}> / {total}</Text>
             </View>
-            <Text style={styles.muted}>~{remainingDays} dias restantes no frasco</Text>
+            <Text style={styles.muted}>~{remainingDays} dias restantes</Text>
           </View>
-          <Donut percent={used} size={110} sublabel="USADO" />
+          <Donut percent={used} size={118} sublabel="USADO" />
         </View>
       </Card>
 
       <Pressable
         onPress={() => !tookToday && logConstancy(true)}
         disabled={tookToday}
-        style={[styles.cta, tookToday && { opacity: 0.5 }]}
+        style={({ pressed }) => [
+          styles.cta,
+          shadow.glow,
+          tookToday && { opacity: 0.55 },
+          pressed && { transform: [{ scale: 0.98 }] },
+        ]}
       >
-        <Text style={styles.ctaText}>
-          {tookToday ? '✓ Registrada hoje' : '◉ Registrar cápsula de hoje'}
-        </Text>
+        {!tookToday && (
+          <LinearGradient
+            colors={gradients.cta}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill as any}
+          />
+        )}
+        {tookToday && <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(34,197,94,0.15)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.4)', borderRadius: radius.md }]} />}
+        <View style={styles.ctaInner}>
+          <Text style={[styles.ctaIcon, { color: tookToday ? colors.green : '#06240F' }]}>
+            {tookToday ? '✓' : '◉'}
+          </Text>
+          <Text style={[styles.ctaText, { color: tookToday ? colors.green : '#06240F' }]}>
+            {tookToday ? 'Registrada hoje' : 'Registrar cápsula de hoje'}
+          </Text>
+        </View>
       </Pressable>
 
-      <Text style={styles.sectionLabel}>COMPOSIÇÃO</Text>
-      <View style={{ gap: 8 }}>
-        {COMPOSITION.map((c, i) => (
-          <View key={i} style={styles.compRow}>
-            <View style={[styles.dot, { backgroundColor: c.color }]} />
-            <Text style={styles.compName}>{c.name}</Text>
-            <Text style={styles.compTag}>{c.tag}</Text>
-          </View>
-        ))}
+      <View>
+        <Eyebrow text="Composição" />
+        <View style={{ gap: 8, marginTop: 12 }}>
+          {COMPOSITION.map((c, i) => (
+            <View key={i} style={styles.compRow}>
+              <View style={[styles.dot, { backgroundColor: c.color, shadowColor: c.color, shadowOpacity: 0.6, shadowRadius: 8 }]} />
+              <Text style={styles.compName}>{c.name}</Text>
+              <Text style={styles.compTag}>{c.tag}</Text>
+            </View>
+          ))}
+        </View>
       </View>
 
-      <Card variant="accent">
-        <Text style={styles.sectionLabel}>— MODO DE USO</Text>
+      <Card variant="accent" padding={22}>
+        <Eyebrow text="Modo de Uso" />
         <Text style={styles.howTitle}>2 cápsulas, 30min antes do momento de fraqueza.</Text>
         <Text style={styles.muted}>
           Cada pessoa tem o seu horário. Ajuste pelo seu padrão — não pelo relógio dos outros.
@@ -83,68 +110,75 @@ export default function Product() {
 }
 
 const styles = StyleSheet.create({
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 },
   title: {
     color: colors.textLight,
-    fontSize: 34,
+    fontSize: 38,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 36,
+    fontWeight: '500',
+    lineHeight: 40,
+    marginTop: 8,
+    letterSpacing: -0.5,
   },
   badge: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1,
   },
-  badgeOn: { backgroundColor: 'rgba(34,197,94,0.15)', borderColor: colors.green },
+  badgeOn: { backgroundColor: 'rgba(34,197,94,0.14)', borderColor: 'rgba(34,197,94,0.35)' },
   badgeOff: { backgroundColor: 'rgba(255,255,255,0.04)', borderColor: colors.navyBorder },
-  badgeText: { fontSize: 12, fontWeight: '700' },
-  badgeTextOn: { color: colors.green },
-  badgeTextOff: { color: colors.textMuted },
+  badgeDot: { width: 6, height: 6, borderRadius: 3 },
+  badgeText: { fontSize: 11, fontWeight: '800', letterSpacing: 1 },
   bottleRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  bottleLabel: { color: colors.textMuted, fontSize: 10, letterSpacing: 2, fontWeight: '700' },
-  bottleBig: { color: colors.textLight, fontSize: 54, fontWeight: '900', lineHeight: 58 },
-  bottleSmall: {
-    color: colors.textMuted,
-    fontSize: 20,
-    fontWeight: '700',
-    textDecorationLine: 'line-through',
+  bottleBig: {
+    color: colors.textLight,
+    fontSize: 62,
+    fontWeight: '900',
+    lineHeight: 64,
+    letterSpacing: -2,
   },
-  muted: { color: colors.textMuted, fontSize: 12, marginTop: 6 },
+  bottleSmall: { color: colors.textMuted, fontSize: 22, fontWeight: '700' },
+  muted: { color: colors.textMuted, fontSize: 13, marginTop: 8, lineHeight: 20 },
   cta: {
-    backgroundColor: colors.green,
-    borderRadius: 16,
-    paddingVertical: 18,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  ctaInner: {
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: colors.green,
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 8,
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 20,
   },
-  ctaText: { color: '#06240F', fontWeight: '800', fontSize: 15, letterSpacing: 0.5 },
-  sectionLabel: {
-    color: colors.textMuted,
-    fontSize: 10,
-    letterSpacing: 2,
-    fontWeight: '700',
-    marginTop: 4,
-    marginBottom: 6,
-  },
+  ctaIcon: { fontSize: 16, fontWeight: '900' },
+  ctaText: { fontWeight: '800', fontSize: 14, letterSpacing: 1.5, textTransform: 'uppercase' },
   compRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 12,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.navyBorder,
   },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  dot: { width: 9, height: 9, borderRadius: 5 },
   compName: { flex: 1, color: colors.textLight, fontSize: 14, fontWeight: '700' },
   compTag: { color: colors.textDim, fontSize: 11, fontStyle: 'italic' },
-  howTitle: { color: colors.textLight, fontSize: 16, fontWeight: '700', marginTop: 6 },
+  howTitle: {
+    color: colors.textLight,
+    fontSize: 18,
+    fontWeight: '700',
+    marginTop: 10,
+    lineHeight: 26,
+    fontFamily: font.serif,
+    fontStyle: 'italic',
+  },
 });
