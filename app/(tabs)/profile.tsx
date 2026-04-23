@@ -9,7 +9,7 @@ import { colors, font } from '../../src/theme/tokens';
 
 export default function Profile() {
   const router = useRouter();
-  const { profile, checkIns, constancyLog, reset, setProfile } = useStore();
+  const { profile, checkIns, constancyLog, reset, setProfile, auth, signOut } = useStore();
 
   const goalLabel =
     profile.goal === 'lose_weight'
@@ -32,6 +32,14 @@ export default function Profile() {
         <Text style={styles.title}>Sobre você.</Text>
         <Text style={styles.sub}>Essas respostas ajudam o aplicativo a te entender melhor.</Text>
       </View>
+
+      {auth && (
+        <Card>
+          <Text style={styles.accountLabel}>CONECTADO COMO</Text>
+          <Text style={styles.accountName}>{auth.name}</Text>
+          <Text style={styles.accountEmail}>{auth.email}</Text>
+        </Card>
+      )}
 
       <Card padding={6}>
         <Row label="Objetivo" value={goalLabel} />
@@ -66,7 +74,11 @@ export default function Profile() {
         onPress={() => setProfile({ tutorialSeen: false })}
       />
 
-      <Pressable onPress={reset} style={{ padding: 16, alignItems: 'center', marginTop: 6 }}>
+      <Pressable onPress={signOut} style={{ padding: 16, alignItems: 'center', marginTop: 6 }}>
+        <Text style={styles.signout}>Sair da conta</Text>
+      </Pressable>
+
+      <Pressable onPress={reset} style={{ padding: 16, alignItems: 'center' }}>
         <Text style={styles.danger}>Apagar minhas respostas e recomeçar</Text>
       </Pressable>
 
@@ -155,6 +167,10 @@ const styles = StyleSheet.create({
   },
   chev: { color: colors.green, fontSize: 22 },
   danger: { color: colors.danger, fontSize: 14, fontWeight: '800', textDecorationLine: 'underline' },
+  signout: { color: colors.textLight, fontSize: 15, fontWeight: '800', textDecorationLine: 'underline' },
+  accountLabel: { color: colors.green, fontSize: 11, letterSpacing: 2, fontWeight: '800' },
+  accountName: { color: colors.textLight, fontSize: 22, fontFamily: font.serif, fontStyle: 'italic', marginTop: 8 },
+  accountEmail: { color: colors.textMuted, fontSize: 14, marginTop: 4 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.green },
   brandFooter: { color: colors.textLight, fontSize: 12, letterSpacing: 3, fontWeight: '800' },
   tag: { color: colors.textDim, fontFamily: font.serif, fontStyle: 'italic', fontSize: 14 },

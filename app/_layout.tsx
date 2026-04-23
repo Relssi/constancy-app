@@ -6,15 +6,25 @@ import { useStore } from '../src/store/useStore';
 import { colors } from '../src/theme/tokens';
 
 export default function RootLayout() {
+  const auth = useStore((s) => s.auth);
   const onboarded = useStore((s) => s.profile.onboarded);
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
+    const inAuth = segments[0] === 'auth';
     const inOnboarding = segments[0] === 'onboarding';
-    if (!onboarded && !inOnboarding) router.replace('/onboarding');
-    if (onboarded && inOnboarding) router.replace('/');
-  }, [onboarded, segments]);
+
+    if (!auth) {
+      if (!inAuth) router.replace('/auth');
+      return;
+    }
+    if (!onboarded) {
+      if (!inOnboarding) router.replace('/onboarding');
+      return;
+    }
+    if (inAuth || inOnboarding) router.replace('/');
+  }, [auth, onboarded, segments]);
 
   return (
     <SafeAreaProvider>
