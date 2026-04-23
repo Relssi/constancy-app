@@ -25,39 +25,46 @@ export default function ProgressScreen() {
 
   const insight =
     streak >= 6
-      ? `Você manteve a rotina em ${streak} de 7 dias — mesmo nos dias pesados. Isso é o CONSTANCY funcionando.`
+      ? `Você manteve a rotina em ${streak} dos últimos 7 dias. Isso é ótimo. Continue.`
       : streak >= 3
-      ? `${streak} dias seguidos. O hábito tá virando padrão — não decisão.`
-      : 'Registre os próximos dias. Precisamos de 3+ pra começar a ver seu padrão real.';
+      ? `${streak} dias seguidos. Você tá pegando o ritmo.`
+      : 'Marque os próximos dias. Em 3 dias eu já consigo te mostrar como você tá indo.';
 
   return (
     <Screen>
       <View>
-        <Eyebrow text={`${cap(monthName())} · Dados Reais`} />
+        <Eyebrow text={cap(monthName())} />
         <Text style={styles.title}>Seu progresso</Text>
-        <Text style={styles.sub}>Sem vaidade. Sem peso. Só o que importa.</Text>
+        <Text style={styles.sub}>Veja como você tá indo este mês.</Text>
       </View>
 
-      <Card padding={22}>
-        <Calendar days={days} />
-      </Card>
+      <View>
+        <Text style={styles.helpCaption}>
+          Os dias em verde são os que você tomou a cápsula. Os brancos você pulou.
+        </Text>
+        <View style={{ marginTop: 12 }}>
+          <Card padding={22}>
+            <Calendar days={days} />
+          </Card>
+        </View>
+      </View>
 
       <View style={{ flexDirection: 'row', gap: 10 }}>
-        <Stat label="Sequência" value={streak} unit="d" highlight />
-        <Stat label="Taxa do mês" value={rate} unit="%" />
-        <Stat label="Recorde" value={best} unit="d" />
+        <Stat label="Dias seguidos" value={streak} unit="" highlight />
+        <Stat label="Do mês" value={rate} unit="%" />
+        <Stat label="Seu recorde" value={best} unit="" />
       </View>
 
       <Card variant="accent">
         <View style={styles.insightHead}>
           <Text style={styles.insightSpark}>✦</Text>
-          <Text style={styles.insightLabel}>INSIGHT DA SEMANA</Text>
+          <Text style={styles.insightLabel}>OBSERVAÇÃO DA SEMANA</Text>
         </View>
         <Text style={styles.insight}>{insight}</Text>
       </Card>
 
       <View>
-        <Eyebrow text="Consistência por dia" />
+        <Eyebrow text="Dias em que você tomou" />
         <View style={{ marginTop: 12 }}>
           <Card>
             <Bars data={bars} />
@@ -68,7 +75,7 @@ export default function ProgressScreen() {
       <View style={styles.quoteWrap}>
         <View style={styles.quoteLine} />
         <Text style={styles.quote}>
-          "Constância é uma escolha diária.{'\n'}E escolhas diárias precisam de suporte."
+          "Manter é uma escolha diária.{'\n'}E escolhas diárias precisam de cuidado."
         </Text>
       </View>
     </Screen>
@@ -92,7 +99,7 @@ function Stat({
         <Text style={[styles.statVal, highlight && { color: colors.green }]}>{value}</Text>
         <Text style={styles.statUnit}>{unit}</Text>
       </View>
-      <Text style={styles.statLabel}>{label.toUpperCase()}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </Card>
   );
 }
@@ -104,31 +111,31 @@ function cap(s: string) {
 const styles = StyleSheet.create({
   title: {
     color: colors.textLight,
-    fontSize: 38,
+    fontSize: 40,
     fontFamily: font.serif,
     fontStyle: 'italic',
     fontWeight: '500',
     marginTop: 10,
     letterSpacing: -0.5,
   },
-  sub: { color: colors.textMuted, fontSize: 13, marginTop: 6, lineHeight: 20 },
-  statVal: { color: colors.textLight, fontSize: 30, fontWeight: '900', letterSpacing: -1 },
-  statUnit: { color: colors.textMuted, fontSize: 13, fontWeight: '800', marginLeft: 2 },
+  sub: { color: colors.textMuted, fontSize: 16, marginTop: 8, lineHeight: 24 },
+  helpCaption: { color: colors.textMuted, fontSize: 14, fontStyle: 'italic', lineHeight: 22 },
+  statVal: { color: colors.textLight, fontSize: 34, fontWeight: '900', letterSpacing: -1 },
+  statUnit: { color: colors.textMuted, fontSize: 14, fontWeight: '800', marginLeft: 2 },
   statLabel: {
     color: colors.textMuted,
-    fontSize: 9,
-    letterSpacing: 1.8,
-    fontWeight: '800',
+    fontSize: 12,
+    fontWeight: '700',
     marginTop: 6,
   },
   insightHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  insightSpark: { color: colors.green, fontSize: 14 },
-  insightLabel: { color: colors.green, fontSize: 11, letterSpacing: 2.5, fontWeight: '800' },
+  insightSpark: { color: colors.green, fontSize: 16 },
+  insightLabel: { color: colors.green, fontSize: 12, letterSpacing: 2, fontWeight: '800' },
   insight: {
     color: colors.textLight,
-    fontSize: 16,
-    lineHeight: 24,
-    marginTop: 12,
+    fontSize: 18,
+    lineHeight: 28,
+    marginTop: 14,
     fontFamily: font.serif,
     fontStyle: 'italic',
   },
@@ -138,9 +145,9 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    fontSize: 15,
+    fontSize: 16,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 26,
     paddingHorizontal: 10,
   },
 });

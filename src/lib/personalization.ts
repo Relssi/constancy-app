@@ -97,20 +97,20 @@ export function nextIntervention(
     return {
       title: 'Essa fome é de agora ou de algo mais?',
       body: 'Nomeia o que tá sentindo. Nomear tira o automatismo.',
-      action: 'Fazer check-in',
+      action: 'Responder agora',
     };
   }
   if (slot === 'afternoon') {
     return {
-      title: 'Hora do crash da tarde.',
-      body: 'Mais proteína agora evita o impulso por doce daqui 2h.',
+      title: 'Hora da queda da tarde.',
+      body: 'Comer um pouco de proteína agora evita a vontade de doce daqui 2h.',
       action: 'Marcar feito',
     };
   }
   return {
-    title: 'Como tá o controle agora?',
-    body: 'Um check-in rápido mantém o padrão vivo.',
-    action: 'Check-in rápido',
+    title: 'Como você está agora?',
+    body: 'Responder 2 perguntas ajuda o aplicativo a te entender.',
+    action: 'Responder agora',
   };
 }
 

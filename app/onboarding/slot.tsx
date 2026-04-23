@@ -3,15 +3,15 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Screen } from '../../src/components/Screen';
 import { Button } from '../../src/components/Button';
-import { Heading } from '../../src/components/Heading';
 import { Pill } from '../../src/components/Pill';
+import { Eyebrow } from '../../src/components/Eyebrow';
 import { useStore, TimeSlot } from '../../src/store/useStore';
-import { colors } from '../../src/theme/tokens';
+import { colors, font } from '../../src/theme/tokens';
 
 const OPTIONS: { v: TimeSlot; label: string; hint: string }[] = [
-  { v: 'morning', label: 'Manhã', hint: 'Fome ao acordar, café desregulado' },
-  { v: 'afternoon', label: 'Tarde', hint: 'Crash depois do almoço, doce às 16h' },
-  { v: 'night', label: 'Noite', hint: 'Ataques depois das 20h, tédio, TV' },
+  { v: 'morning', label: 'Manhã', hint: 'Ao acordar, antes do café' },
+  { v: 'afternoon', label: 'Tarde', hint: 'Depois do almoço, vontade de doce' },
+  { v: 'night', label: 'Noite', hint: 'Depois das 20h, em frente à TV' },
 ];
 
 export default function OnboardingSlot() {
@@ -20,19 +20,20 @@ export default function OnboardingSlot() {
   const router = useRouter();
   return (
     <Screen>
-      <Text style={styles.step}>1 / 3</Text>
-      <Heading serif="Quando você" sans="Perde o Controle?" />
+      <Text style={styles.step}>PERGUNTA 1 DE 3</Text>
+      <Eyebrow text="Sua Hora Difícil" />
+      <Text style={styles.title}>Qual a hora{'\n'}mais difícil{'\n'}do seu dia?</Text>
       <Text style={styles.body}>
-        A hora que mais te derruba. O app vai ficar mais firme nesse momento.
+        A hora que bate mais vontade de comer. O aplicativo vai te ajudar nesse momento.
       </Text>
       <View style={{ gap: 12, marginTop: 8 }}>
         {OPTIONS.map((o) => (
           <Pill
             key={o.v}
-            label={`${o.label}  ·  ${o.hint}`}
+            label={`${o.label}  —  ${o.hint}`}
             active={sel === o.v}
             onPress={() => setSel(o.v)}
-            style={{ paddingVertical: 16 }}
+            style={{ paddingVertical: 20 }}
           />
         ))}
       </View>
@@ -50,6 +51,14 @@ export default function OnboardingSlot() {
 }
 
 const styles = StyleSheet.create({
-  step: { color: colors.green, fontWeight: '800', letterSpacing: 2, fontSize: 12 },
-  body: { color: colors.textMuted, fontSize: 15, lineHeight: 22 },
+  step: { color: colors.green, fontWeight: '800', letterSpacing: 2, fontSize: 13 },
+  title: {
+    color: colors.textLight,
+    fontSize: 36,
+    fontFamily: font.serif,
+    fontStyle: 'italic',
+    lineHeight: 42,
+    marginTop: 4,
+  },
+  body: { color: colors.textMuted, fontSize: 16, lineHeight: 25 },
 });

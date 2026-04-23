@@ -25,6 +25,7 @@ export type RoutineItem = {
 
 export type Profile = {
   onboarded: boolean;
+  tutorialSeen: boolean;
   lossSlot?: TimeSlot;
   hungerType?: HungerType;
   goal?: Goal;
@@ -48,6 +49,7 @@ type State = {
   failedToday: boolean;
   setProfile: (p: Partial<Profile>) => void;
   finishOnboarding: () => void;
+  finishTutorial: () => void;
   addCheckIn: (c: Omit<CheckIn, 'id' | 'ts'>) => void;
   logConstancy: (taken: boolean) => void;
   toggleRoutine: (id: string) => void;
@@ -61,13 +63,14 @@ const todayKey = () => new Date().toDateString();
 export const useStore = create<State>()(
   persist(
     (set, get) => ({
-      profile: { onboarded: false, bottleSize: 60, bottleStartedAt: Date.now() },
+      profile: { onboarded: false, tutorialSeen: false, bottleSize: 60, bottleStartedAt: Date.now() },
       checkIns: [],
       constancyLog: [],
       routineDone: {},
       failedToday: false,
       setProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
       finishOnboarding: () => set((s) => ({ profile: { ...s.profile, onboarded: true } })),
+      finishTutorial: () => set((s) => ({ profile: { ...s.profile, tutorialSeen: true } })),
       addCheckIn: (c) =>
         set((s) => ({
           checkIns: [
@@ -88,7 +91,7 @@ export const useStore = create<State>()(
       clearFail: () => set({ failedToday: false }),
       reset: () =>
         set({
-          profile: { onboarded: false, bottleSize: 60, bottleStartedAt: Date.now() },
+          profile: { onboarded: false, tutorialSeen: false, bottleSize: 60, bottleStartedAt: Date.now() },
           checkIns: [],
           constancyLog: [],
           routineDone: {},

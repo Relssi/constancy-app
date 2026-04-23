@@ -9,57 +9,73 @@ import { colors, font } from '../../src/theme/tokens';
 
 export default function Profile() {
   const router = useRouter();
-  const { profile, checkIns, constancyLog, reset } = useStore();
+  const { profile, checkIns, constancyLog, reset, setProfile } = useStore();
 
   const goalLabel =
     profile.goal === 'lose_weight'
       ? 'Emagrecer'
       : profile.goal === 'appetite'
-      ? 'Controlar apetite'
-      : 'Disciplina alimentar';
+      ? 'Controlar a vontade'
+      : 'Manter a rotina';
 
   const hungerLabel =
     profile.hungerType === 'emotional'
       ? 'Emocional'
       : profile.hungerType === 'physical'
       ? 'Física'
-      : 'Mista';
+      : 'Dos dois tipos';
 
   return (
     <Screen>
       <View>
-        <Eyebrow text="Seu Perfil" />
-        <Text style={styles.title}>Como o app{'\n'}te enxerga.</Text>
+        <Eyebrow text="Meu Perfil" />
+        <Text style={styles.title}>Sobre você.</Text>
+        <Text style={styles.sub}>Essas respostas ajudam o aplicativo a te entender melhor.</Text>
       </View>
 
       <Card padding={6}>
         <Row label="Objetivo" value={goalLabel} />
         <Divider />
-        <Row label="Momento crítico" value={slotLabel(profile.lossSlot ?? 'afternoon')} />
+        <Row label="Hora difícil do dia" value={slotLabel(profile.lossSlot ?? 'afternoon')} />
         <Divider />
-        <Row label="Tipo de fome" value={hungerLabel} />
+        <Row label="Tipo de vontade" value={hungerLabel} />
         <Divider />
-        <Row label="Frasco" value={`${profile.bottleSize} cápsulas`} />
+        <Row label="Tamanho do frasco" value={`${profile.bottleSize} cápsulas`} />
       </Card>
 
       <View style={{ flexDirection: 'row', gap: 10 }}>
-        <StatCard label="Check-ins" value={checkIns.length} />
-        <StatCard label="Cápsulas" value={constancyLog.filter((l) => l.taken).length} />
+        <StatCard label="Vezes que respondi" value={checkIns.length} />
+        <StatCard label="Cápsulas marcadas" value={constancyLog.filter((l) => l.taken).length} />
       </View>
 
-      <LinkRow label="Conteúdo personalizado" onPress={() => router.push('/content')} />
-      <LinkRow label="Fazer check-in" onPress={() => router.push('/check-in')} />
+      <Eyebrow text="Atalhos" />
 
-      <Pressable onPress={reset} style={{ padding: 14, alignItems: 'center' }}>
-        <Text style={styles.danger}>Resetar onboarding</Text>
+      <LinkRow
+        label="Ver dicas pra você"
+        hint="Conteúdo escolhido pelo seu perfil"
+        onPress={() => router.push('/content')}
+      />
+      <LinkRow
+        label="Responder como estou"
+        hint="2 perguntas, 30 segundos"
+        onPress={() => router.push('/check-in')}
+      />
+      <LinkRow
+        label="Ver tutorial de novo"
+        hint="Explicação passo a passo"
+        onPress={() => setProfile({ tutorialSeen: false })}
+      />
+
+      <Pressable onPress={reset} style={{ padding: 16, alignItems: 'center', marginTop: 6 }}>
+        <Text style={styles.danger}>Apagar minhas respostas e recomeçar</Text>
       </Pressable>
 
-      <View style={{ alignItems: 'center', gap: 6, marginTop: 8 }}>
+      <View style={{ alignItems: 'center', gap: 8, marginTop: 8 }}>
         <View style={styles.dot} />
         <Text style={styles.brandFooter}>
           CONSTANCY <Text style={{ color: colors.textDim }}>by FOCULAB</Text>
         </Text>
-        <Text style={styles.tag}>Constância é uma escolha diária.</Text>
+        <Text style={styles.tag}>Manter é uma escolha diária.</Text>
       </View>
     </Screen>
   );
@@ -82,16 +98,19 @@ function StatCard({ label, value }: { label: string; value: number }) {
   return (
     <Card style={{ flex: 1 }}>
       <Text style={styles.statVal}>{value}</Text>
-      <Text style={styles.statLabel}>{label.toUpperCase()}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </Card>
   );
 }
 
-function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
+function LinkRow({ label, hint, onPress }: { label: string; hint: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress}>
       <Card style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={styles.linkText}>{label}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.linkText}>{label}</Text>
+          <Text style={styles.linkHint}>{hint}</Text>
+        </View>
         <View style={styles.chevWrap}>
           <Text style={styles.chev}>›</Text>
         </View>
@@ -103,45 +122,40 @@ function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
 const styles = StyleSheet.create({
   title: {
     color: colors.textLight,
-    fontSize: 36,
+    fontSize: 40,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 40,
+    lineHeight: 42,
     marginTop: 10,
     letterSpacing: -0.5,
   },
-  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 14 },
-  rowLabel: { color: colors.textMuted, fontSize: 13 },
-  rowValue: { color: colors.textLight, fontSize: 14, fontWeight: '700' },
-  divider: { height: 1, backgroundColor: colors.navyBorder, marginHorizontal: 14 },
-  statVal: { color: colors.textLight, fontSize: 28, fontWeight: '900', letterSpacing: -1 },
+  sub: { color: colors.textMuted, fontSize: 15, lineHeight: 24, marginTop: 10 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 16 },
+  rowLabel: { color: colors.textMuted, fontSize: 15 },
+  rowValue: { color: colors.textLight, fontSize: 15, fontWeight: '700' },
+  divider: { height: 1, backgroundColor: colors.navyBorder, marginHorizontal: 16 },
+  statVal: { color: colors.textLight, fontSize: 32, fontWeight: '900', letterSpacing: -1 },
   statLabel: {
     color: colors.textMuted,
-    fontSize: 9,
-    letterSpacing: 1.8,
-    fontWeight: '800',
-    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 6,
   },
-  linkText: { color: colors.textLight, fontSize: 15, fontWeight: '700' },
+  linkText: { color: colors.textLight, fontSize: 17, fontWeight: '700' },
+  linkHint: { color: colors.textMuted, fontSize: 13, marginTop: 4, fontStyle: 'italic' },
   chevWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(34,197,94,0.12)',
+    backgroundColor: 'rgba(34,197,94,0.14)',
     borderWidth: 1,
-    borderColor: 'rgba(34,197,94,0.25)',
+    borderColor: 'rgba(34,197,94,0.3)',
   },
-  chev: { color: colors.green, fontSize: 18 },
-  danger: { color: colors.danger, fontSize: 12, fontWeight: '800', letterSpacing: 1.5 },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.green },
-  brandFooter: { color: colors.textLight, fontSize: 11, letterSpacing: 3, fontWeight: '800' },
-  tag: {
-    color: colors.textDim,
-    fontFamily: font.serif,
-    fontStyle: 'italic',
-    fontSize: 13,
-    marginTop: 4,
-  },
+  chev: { color: colors.green, fontSize: 22 },
+  danger: { color: colors.danger, fontSize: 14, fontWeight: '800', textDecorationLine: 'underline' },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.green },
+  brandFooter: { color: colors.textLight, fontSize: 12, letterSpacing: 3, fontWeight: '800' },
+  tag: { color: colors.textDim, fontFamily: font.serif, fontStyle: 'italic', fontSize: 14 },
 });

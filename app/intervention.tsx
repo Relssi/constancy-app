@@ -6,9 +6,9 @@ import { Button } from '../src/components/Button';
 import { colors, font } from '../src/theme/tokens';
 
 const PHASES = [
-  { label: 'Inspira', seconds: 4 },
-  { label: 'Segura', seconds: 2 },
-  { label: 'Expira', seconds: 4 },
+  { label: 'Puxe o ar devagar', seconds: 4 },
+  { label: 'Segure', seconds: 2 },
+  { label: 'Solte o ar', seconds: 4 },
 ];
 
 export default function Intervention() {
@@ -20,7 +20,8 @@ export default function Intervention() {
 
   useEffect(() => {
     const p = PHASES[phaseIdx];
-    const target = p.label === 'Inspira' ? 1 : p.label === 'Expira' ? 0.6 : lastTarget.current;
+    const target =
+      p.label === 'Puxe o ar devagar' ? 1 : p.label === 'Solte o ar' ? 0.6 : lastTarget.current;
     lastTarget.current = target;
     Animated.timing(scale, {
       toValue: target,
@@ -41,19 +42,26 @@ export default function Intervention() {
 
   return (
     <Screen scroll={false}>
-      <Pressable onPress={() => router.back()} style={{ alignSelf: 'flex-start' }}>
-        <Text style={styles.back}>‹ voltar</Text>
+      <Pressable onPress={() => router.back()} style={{ alignSelf: 'flex-start', padding: 6 }}>
+        <Text style={styles.back}>‹ Voltar</Text>
       </Pressable>
       <View style={styles.center}>
-        <Text style={styles.eyebrow}>— RESPIRA</Text>
+        <Text style={styles.eyebrow}>— RESPIRE COMIGO</Text>
         <Text style={styles.headline}>A vontade passa.</Text>
         <Text style={styles.sub}>A decisão fica.</Text>
         <Animated.View style={[styles.orb, { transform: [{ scale }] }]} />
         <Text style={styles.phase}>{done ? 'Pronto.' : PHASES[phaseIdx].label}</Text>
-        <Text style={styles.cycle}>{done ? '3 / 3 ciclos' : `${cycle} / 3 ciclos`}</Text>
+        <Text style={styles.cycle}>
+          {done ? 'Você completou os 3 ciclos' : `${cycle} de 3 respirações`}
+        </Text>
+        <Text style={styles.helper}>
+          {done
+            ? 'Beba um copo de água agora. A vontade vai ceder.'
+            : 'Siga o círculo verde. Respire no ritmo dele.'}
+        </Text>
       </View>
       <Button
-        label={done ? 'Voltar pro plano' : 'Já consegui decidir'}
+        label={done ? 'Voltar pro início' : 'Já estou melhor'}
         onPress={() => router.replace('/')}
       />
     </Screen>
@@ -61,15 +69,15 @@ export default function Intervention() {
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.textMuted, fontSize: 14 },
+  back: { color: colors.textMuted, fontSize: 16, fontWeight: '700' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
-  eyebrow: { color: colors.green, fontSize: 11, letterSpacing: 3, fontWeight: '800' },
-  headline: { color: colors.textLight, fontSize: 30, fontFamily: font.serif, fontStyle: 'italic' },
-  sub: { color: colors.green, fontSize: 30, fontFamily: font.serif, fontStyle: 'italic' },
+  eyebrow: { color: colors.green, fontSize: 12, letterSpacing: 3, fontWeight: '800' },
+  headline: { color: colors.textLight, fontSize: 32, fontFamily: font.serif, fontStyle: 'italic' },
+  sub: { color: colors.green, fontSize: 32, fontFamily: font.serif, fontStyle: 'italic' },
   orb: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     backgroundColor: 'rgba(34,197,94,0.15)',
     borderWidth: 2,
     borderColor: colors.green,
@@ -78,6 +86,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 40,
   },
-  phase: { color: colors.textLight, fontSize: 22, fontWeight: '700', marginTop: 10 },
-  cycle: { color: colors.textMuted, fontSize: 13, letterSpacing: 1 },
+  phase: { color: colors.textLight, fontSize: 24, fontWeight: '700', marginTop: 14 },
+  cycle: { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
+  helper: {
+    color: colors.textMuted,
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 10,
+    fontStyle: 'italic',
+    paddingHorizontal: 20,
+  },
 });

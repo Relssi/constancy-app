@@ -2,8 +2,8 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen } from '../src/components/Screen';
 import { Button } from '../src/components/Button';
-import { Heading } from '../src/components/Heading';
 import { Card } from '../src/components/Card';
+import { Eyebrow } from '../src/components/Eyebrow';
 import { useStore } from '../src/store/useStore';
 import { colors, font } from '../src/theme/tokens';
 
@@ -13,29 +13,34 @@ export default function Reset() {
 
   return (
     <Screen>
-      <Pressable onPress={() => router.back()}>
-        <Text style={styles.back}>‹ voltar</Text>
+      <Pressable onPress={() => router.back()} style={{ paddingVertical: 6 }}>
+        <Text style={styles.back}>‹ Voltar</Text>
       </Pressable>
-      <Heading eyebrow="Reset" serif="Ok." sans="Próxima Refeição." />
+
+      <View>
+        <Eyebrow text="Recomeçar" />
+        <Text style={styles.title}>Tudo bem.{'\n'}Pode continuar.</Text>
+      </View>
+
       <Text style={styles.body}>
-        Você não falhou o processo. Falhou uma decisão. Elas acontecem.
+        Você não errou o caminho. Só uma hora difícil. Isso acontece com todo mundo.
       </Text>
       <Text style={styles.body}>
-        O que quebra a constância não é o erro — é o "já que errei, tanto faz".
+        O que quebra mesmo é pensar "já errei, agora tanto faz". Não é assim.
       </Text>
 
       <Card variant="accent">
-        <Text style={styles.cardTitle}>Foca nisso agora:</Text>
-        <View style={{ gap: 10, marginTop: 10 }}>
-          <Text style={styles.item}>· Bebe um copo de água.</Text>
-          <Text style={styles.item}>· Próxima refeição = novo começo.</Text>
-          <Text style={styles.item}>· Não compensa. Não pune. Só continua.</Text>
+        <Eyebrow text="Faça Agora" />
+        <View style={{ gap: 12, marginTop: 14 }}>
+          <Step n="1" text="Beba um copo de água devagar." />
+          <Step n="2" text="A próxima refeição é um novo começo." />
+          <Step n="3" text="Não precisa compensar. Não precisa se punir." />
         </View>
       </Card>
 
       <View style={{ flex: 1 }} />
       <Button
-        label="Sigo daqui"
+        label="Entendi, vou continuar"
         onPress={() => {
           markFail();
           router.replace('/');
@@ -45,9 +50,37 @@ export default function Reset() {
   );
 }
 
+function Step({ n, text }: { n: string; text: string }) {
+  return (
+    <View style={styles.step}>
+      <View style={styles.stepNum}>
+        <Text style={styles.stepNumText}>{n}</Text>
+      </View>
+      <Text style={styles.stepText}>{text}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  back: { color: colors.textMuted, fontSize: 14 },
-  body: { color: colors.textMuted, fontSize: 15, lineHeight: 23 },
-  cardTitle: { color: colors.textLight, fontSize: 16, fontWeight: '700', fontFamily: font.serif, fontStyle: 'italic' },
-  item: { color: colors.textLight, fontSize: 15, lineHeight: 22 },
+  back: { color: colors.textMuted, fontSize: 16, fontWeight: '700' },
+  title: {
+    color: colors.textLight,
+    fontSize: 36,
+    fontFamily: font.serif,
+    fontStyle: 'italic',
+    lineHeight: 42,
+    marginTop: 8,
+  },
+  body: { color: colors.textLight, fontSize: 17, lineHeight: 27, opacity: 0.85 },
+  step: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  stepNum: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.green,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNumText: { color: '#06240F', fontWeight: '900', fontSize: 15 },
+  stepText: { flex: 1, color: colors.textLight, fontSize: 16, lineHeight: 24 },
 });

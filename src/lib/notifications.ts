@@ -24,9 +24,9 @@ export async function scheduleCheckInReminders(slot?: 'morning' | 'afternoon' | 
   if (!Notifications) return;
   await Notifications.cancelAllScheduledNotificationsAsync();
   const times: { hour: number; minute: number; body: string }[] = [
-    { hour: 10, minute: 0, body: 'Check-in da manhã: como tá a fome?' },
-    { hour: 15, minute: 30, body: 'Você costuma sentir mais fome agora. Respira 10s antes de decidir.' },
-    { hour: 20, minute: 30, body: 'Ontem você perdeu controle nesse horário. Tenta um chá antes do doce.' },
+    { hour: 10, minute: 0, body: 'Bom dia. Como está sua vontade de comer agora?' },
+    { hour: 15, minute: 30, body: 'É a hora difícil do dia. Respire fundo antes de decidir.' },
+    { hour: 20, minute: 30, body: 'Antes de comer algo doce, experimente um copo de água ou um chá.' },
   ];
   for (const t of times) {
     await Notifications.scheduleNotificationAsync({

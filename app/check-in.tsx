@@ -3,11 +3,11 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Screen } from '../src/components/Screen';
 import { Button } from '../src/components/Button';
-import { Heading } from '../src/components/Heading';
+import { Eyebrow } from '../src/components/Eyebrow';
 import { Pill } from '../src/components/Pill';
 import { useStore, CheckIn } from '../src/store/useStore';
 import { currentSlot } from '../src/lib/personalization';
-import { colors } from '../src/theme/tokens';
+import { colors, font } from '../src/theme/tokens';
 
 export default function CheckInScreen() {
   const [hunger, setHunger] = useState<CheckIn['hunger'] | null>(null);
@@ -17,11 +17,18 @@ export default function CheckInScreen() {
 
   return (
     <Screen>
-      <Pressable onPress={() => router.back()}>
-        <Text style={styles.back}>‹ voltar</Text>
+      <Pressable onPress={() => router.back()} style={styles.backBtn}>
+        <Text style={styles.back}>‹ Voltar</Text>
       </Pressable>
-      <Heading eyebrow="Check-in" serif="Como tá" sans="A Fome Agora?" />
-      <Text style={styles.body}>1 = nenhuma · 5 = intensa</Text>
+
+      <View>
+        <Eyebrow text="Como Você Está" />
+        <Text style={styles.title}>Como está{'\n'}sua vontade agora?</Text>
+        <Text style={styles.caption}>
+          1 é pouca vontade. 5 é muita vontade de comer algo.
+        </Text>
+      </View>
+
       <View style={styles.row}>
         {[1, 2, 3, 4, 5].map((n) => (
           <Pill
@@ -33,16 +40,33 @@ export default function CheckInScreen() {
           />
         ))}
       </View>
+      <View style={styles.rangeLabels}>
+        <Text style={styles.rangeLabel}>pouca</Text>
+        <Text style={styles.rangeLabel}>muita</Text>
+      </View>
 
-      <Text style={[styles.body, { marginTop: 16 }]}>Controle hoje</Text>
-      <View style={styles.row}>
-        {(['low', 'medium', 'high'] as const).map((c) => (
+      <View style={{ marginTop: 16 }}>
+        <Eyebrow text="E no Geral Hoje?" />
+        <Text style={styles.title2}>Como foi seu dia?</Text>
+        <Text style={styles.caption}>
+          Escolha como você tá se sentindo no controle da alimentação hoje.
+        </Text>
+      </View>
+
+      <View style={{ gap: 10 }}>
+        {(['high', 'medium', 'low'] as const).map((c) => (
           <Pill
             key={c}
-            label={c === 'low' ? 'Baixo' : c === 'medium' ? 'Médio' : 'Alto'}
+            label={
+              c === 'high'
+                ? 'Bem, segui o plano'
+                : c === 'medium'
+                ? 'Mais ou menos'
+                : 'Difícil, não consegui muito'
+            }
             active={control === c}
             onPress={() => setControl(c)}
-            style={{ flex: 1 }}
+            style={{ paddingVertical: 18 }}
           />
         ))}
       </View>
@@ -50,7 +74,7 @@ export default function CheckInScreen() {
       <View style={{ flex: 1 }} />
 
       <Button
-        label="Registrar"
+        label="Salvar resposta"
         disabled={!hunger || !control}
         onPress={() => {
           if (hunger && control) {
@@ -64,7 +88,26 @@ export default function CheckInScreen() {
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.textMuted, fontSize: 14 },
-  body: { color: colors.textMuted, fontSize: 14 },
-  row: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  backBtn: { paddingVertical: 6 },
+  back: { color: colors.textMuted, fontSize: 16, fontWeight: '700' },
+  title: {
+    color: colors.textLight,
+    fontSize: 32,
+    fontFamily: font.serif,
+    fontStyle: 'italic',
+    lineHeight: 38,
+    marginTop: 8,
+  },
+  title2: {
+    color: colors.textLight,
+    fontSize: 28,
+    fontFamily: font.serif,
+    fontStyle: 'italic',
+    lineHeight: 34,
+    marginTop: 8,
+  },
+  caption: { color: colors.textMuted, fontSize: 15, lineHeight: 23, marginTop: 10, fontStyle: 'italic' },
+  row: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  rangeLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6, paddingHorizontal: 4 },
+  rangeLabel: { color: colors.textDim, fontSize: 12, fontWeight: '700' },
 });

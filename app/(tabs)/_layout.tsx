@@ -18,7 +18,7 @@ function Icon({ glyph, focused }: { glyph: string; focused: boolean }) {
         },
       ]}
     >
-      <Text style={{ color: focused ? colors.green : colors.textMuted, fontSize: 16 }}>{glyph}</Text>
+      <Text style={{ color: focused ? colors.green : colors.textMuted, fontSize: 18 }}>{glyph}</Text>
     </View>
   );
 }
@@ -27,7 +27,7 @@ function TabBarBackground() {
   return (
     <View style={StyleSheet.absoluteFill as any}>
       <LinearGradient
-        colors={['rgba(7,24,51,0.85)', 'rgba(5,14,31,0.98)'] as const}
+        colors={['rgba(7,24,51,0.88)', 'rgba(5,14,31,0.98)'] as const}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={StyleSheet.absoluteFill as any}
@@ -44,17 +44,17 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          left: 16,
-          right: 16,
-          bottom: Platform.OS === 'ios' ? 22 : 16,
-          height: 70,
-          borderRadius: 24,
+          left: 14,
+          right: 14,
+          bottom: Platform.OS === 'ios' ? 22 : 14,
+          height: 84,
+          borderRadius: 26,
           borderTopWidth: 0,
           borderWidth: 1,
           borderColor: colors.navyBorderHi,
           backgroundColor: 'transparent',
-          paddingTop: 10,
-          paddingBottom: 10,
+          paddingTop: 12,
+          paddingBottom: 14,
           shadowColor: '#000',
           shadowOpacity: 0.4,
           shadowRadius: 24,
@@ -66,24 +66,24 @@ export default function TabsLayout() {
         tabBarBackground: () => <TabBarBackground />,
         tabBarActiveTintColor: colors.green,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 9.5, fontWeight: '800', letterSpacing: 1.5, marginTop: 2 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '800', letterSpacing: 1, marginTop: 4 },
       }}
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'INÍCIO', tabBarIcon: ({ focused }) => <Icon glyph="⌂" focused={focused} /> }}
+        options={{ title: 'Início', tabBarIcon: ({ focused }) => <Icon glyph="⌂" focused={focused} /> }}
       />
       <Tabs.Screen
         name="progress"
-        options={{ title: 'PROGRESSO', tabBarIcon: ({ focused }) => <Icon glyph="◐" focused={focused} /> }}
+        options={{ title: 'Progresso', tabBarIcon: ({ focused }) => <Icon glyph="◐" focused={focused} /> }}
       />
       <Tabs.Screen
         name="product"
-        options={{ title: 'PRODUTO', tabBarIcon: ({ focused }) => <Icon glyph="●" focused={focused} /> }}
+        options={{ title: 'Cápsula', tabBarIcon: ({ focused }) => <Icon glyph="●" focused={focused} /> }}
       />
       <Tabs.Screen
         name="profile"
-        options={{ title: 'PERFIL', tabBarIcon: ({ focused }) => <Icon glyph="◉" focused={focused} /> }}
+        options={{ title: 'Eu', tabBarIcon: ({ focused }) => <Icon glyph="◉" focused={focused} /> }}
       />
     </Tabs>
   );
@@ -91,9 +91,9 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,

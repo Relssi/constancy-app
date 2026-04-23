@@ -8,11 +8,11 @@ import { useStore } from '../../src/store/useStore';
 import { colors, font, radius, shadow, gradients } from '../../src/theme/tokens';
 
 const COMPOSITION = [
-  { color: '#22C55E', name: 'Cromo', tag: 'metabolismo' },
-  { color: '#A78BFA', name: 'Cafeína', tag: 'foco e energia' },
-  { color: '#34D399', name: 'Guaraná', tag: 'estímulo natural' },
-  { color: '#FBBF24', name: 'Laranja Moro', tag: 'antioxidante' },
-  { color: '#F472B6', name: 'Vitaminas A, C e E', tag: 'suporte metabólico' },
+  { color: '#22C55E', name: 'Cromo', tag: 'ajuda no metabolismo' },
+  { color: '#A78BFA', name: 'Cafeína', tag: 'dá foco e energia' },
+  { color: '#34D399', name: 'Guaraná', tag: 'disposição natural' },
+  { color: '#FBBF24', name: 'Laranja Moro', tag: 'protege o corpo' },
+  { color: '#F472B6', name: 'Vitaminas A, C e E', tag: 'apoio diário' },
   { color: '#60A5FA', name: 'Vitamina B5', tag: 'energia estável' },
 ];
 
@@ -37,7 +37,7 @@ export default function Product() {
         <View style={[styles.badge, tookToday ? styles.badgeOn : styles.badgeOff]}>
           <View style={[styles.badgeDot, { backgroundColor: tookToday ? colors.green : colors.textDim }]} />
           <Text style={[styles.badgeText, { color: tookToday ? colors.green : colors.textMuted }]}>
-            {tookToday ? 'Tomada hoje' : 'Ainda não'}
+            {tookToday ? 'Tomada hoje' : 'Ainda falta'}
           </Text>
         </View>
       </View>
@@ -48,11 +48,11 @@ export default function Product() {
             <Eyebrow text="Cápsulas Restantes" />
             <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 10 }}>
               <Text style={styles.bottleBig}>{remaining}</Text>
-              <Text style={styles.bottleSmall}> / {total}</Text>
+              <Text style={styles.bottleSmall}> de {total}</Text>
             </View>
-            <Text style={styles.muted}>~{remainingDays} dias restantes</Text>
+            <Text style={styles.muted}>Dá pra mais ~{remainingDays} dias</Text>
           </View>
-          <Donut percent={used} size={118} sublabel="USADO" />
+          <Donut percent={used} size={118} sublabel="USADAS" />
         </View>
       </Card>
 
@@ -62,7 +62,7 @@ export default function Product() {
         style={({ pressed }) => [
           styles.cta,
           shadow.glow,
-          tookToday && { opacity: 0.55 },
+          tookToday && { opacity: 0.6 },
           pressed && { transform: [{ scale: 0.98 }] },
         ]}
       >
@@ -74,23 +74,43 @@ export default function Product() {
             style={StyleSheet.absoluteFill as any}
           />
         )}
-        {tookToday && <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(34,197,94,0.15)', borderWidth: 1, borderColor: 'rgba(34,197,94,0.4)', borderRadius: radius.md }]} />}
+        {tookToday && (
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: 'rgba(34,197,94,0.15)',
+                borderWidth: 1,
+                borderColor: 'rgba(34,197,94,0.4)',
+                borderRadius: radius.md,
+              },
+            ]}
+          />
+        )}
         <View style={styles.ctaInner}>
           <Text style={[styles.ctaIcon, { color: tookToday ? colors.green : '#06240F' }]}>
             {tookToday ? '✓' : '◉'}
           </Text>
           <Text style={[styles.ctaText, { color: tookToday ? colors.green : '#06240F' }]}>
-            {tookToday ? 'Registrada hoje' : 'Registrar cápsula de hoje'}
+            {tookToday ? 'Já foi marcado hoje' : 'Marcar que tomei hoje'}
           </Text>
         </View>
       </Pressable>
+      <Text style={styles.bigHelp}>
+        Toque no botão verde depois de tomar a cápsula. Só isso.
+      </Text>
 
       <View>
-        <Eyebrow text="Composição" />
+        <Eyebrow text="O que tem dentro" />
         <View style={{ gap: 8, marginTop: 12 }}>
           {COMPOSITION.map((c, i) => (
             <View key={i} style={styles.compRow}>
-              <View style={[styles.dot, { backgroundColor: c.color, shadowColor: c.color, shadowOpacity: 0.6, shadowRadius: 8 }]} />
+              <View
+                style={[
+                  styles.dot,
+                  { backgroundColor: c.color, shadowColor: c.color, shadowOpacity: 0.6, shadowRadius: 8 },
+                ]}
+              />
               <Text style={styles.compName}>{c.name}</Text>
               <Text style={styles.compTag}>{c.tag}</Text>
             </View>
@@ -99,10 +119,12 @@ export default function Product() {
       </View>
 
       <Card variant="accent" padding={22}>
-        <Eyebrow text="Modo de Uso" />
-        <Text style={styles.howTitle}>2 cápsulas, 30min antes do momento de fraqueza.</Text>
+        <Eyebrow text="Como Tomar" />
+        <Text style={styles.howTitle}>
+          2 cápsulas, 30 minutos antes do horário que costuma te dar vontade.
+        </Text>
         <Text style={styles.muted}>
-          Cada pessoa tem o seu horário. Ajuste pelo seu padrão — não pelo relógio dos outros.
+          Cada pessoa tem o seu horário. Toma no seu ritmo, não precisa pressa.
         </Text>
       </Card>
     </Screen>
@@ -113,11 +135,11 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 },
   title: {
     color: colors.textLight,
-    fontSize: 38,
+    fontSize: 40,
     fontFamily: font.serif,
     fontStyle: 'italic',
     fontWeight: '500',
-    lineHeight: 40,
+    lineHeight: 42,
     marginTop: 8,
     letterSpacing: -0.5,
   },
@@ -125,25 +147,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
     borderRadius: 999,
     borderWidth: 1,
   },
   badgeOn: { backgroundColor: 'rgba(34,197,94,0.14)', borderColor: 'rgba(34,197,94,0.35)' },
   badgeOff: { backgroundColor: 'rgba(255,255,255,0.04)', borderColor: colors.navyBorder },
-  badgeDot: { width: 6, height: 6, borderRadius: 3 },
-  badgeText: { fontSize: 11, fontWeight: '800', letterSpacing: 1 },
+  badgeDot: { width: 7, height: 7, borderRadius: 4 },
+  badgeText: { fontSize: 12, fontWeight: '800' },
   bottleRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   bottleBig: {
     color: colors.textLight,
-    fontSize: 62,
+    fontSize: 68,
     fontWeight: '900',
-    lineHeight: 64,
+    lineHeight: 70,
     letterSpacing: -2,
   },
   bottleSmall: { color: colors.textMuted, fontSize: 22, fontWeight: '700' },
-  muted: { color: colors.textMuted, fontSize: 13, marginTop: 8, lineHeight: 20 },
+  muted: { color: colors.textMuted, fontSize: 15, marginTop: 10, lineHeight: 22 },
   cta: {
     borderRadius: radius.md,
     overflow: 'hidden',
@@ -153,31 +175,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 20,
+    gap: 12,
+    paddingVertical: 22,
   },
-  ctaIcon: { fontSize: 16, fontWeight: '900' },
-  ctaText: { fontWeight: '800', fontSize: 14, letterSpacing: 1.5, textTransform: 'uppercase' },
+  ctaIcon: { fontSize: 20, fontWeight: '900' },
+  ctaText: { fontWeight: '900', fontSize: 16, letterSpacing: 0.5 },
+  bigHelp: {
+    color: colors.textMuted,
+    textAlign: 'center',
+    fontSize: 14,
+    fontStyle: 'italic',
+    marginTop: -4,
+  },
   compRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 16,
     backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.navyBorder,
   },
-  dot: { width: 9, height: 9, borderRadius: 5 },
-  compName: { flex: 1, color: colors.textLight, fontSize: 14, fontWeight: '700' },
-  compTag: { color: colors.textDim, fontSize: 11, fontStyle: 'italic' },
+  dot: { width: 10, height: 10, borderRadius: 5 },
+  compName: { flex: 1, color: colors.textLight, fontSize: 16, fontWeight: '700' },
+  compTag: { color: colors.textDim, fontSize: 12, fontStyle: 'italic' },
   howTitle: {
     color: colors.textLight,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
-    marginTop: 10,
-    lineHeight: 26,
+    marginTop: 12,
+    lineHeight: 30,
     fontFamily: font.serif,
     fontStyle: 'italic',
   },
