@@ -5,6 +5,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export type TimeSlot = 'morning' | 'afternoon' | 'night';
 export type HungerType = 'emotional' | 'physical' | 'mixed';
 export type Goal = 'lose_weight' | 'appetite' | 'discipline';
+export type Sex = 'male' | 'female';
+export type Activity = 'sedentary' | 'light' | 'moderate' | 'active';
 
 export type CheckIn = {
   id: string;
@@ -29,7 +31,11 @@ export type Meal = {
   time: string;
   calories?: number;
   notes?: string;
+  recurring?: boolean;
 };
+
+export type WeightEntry = { ts: number; kg: number };
+export type ExtraEntry = { id: string; ts: number; name: string; calories: number };
 
 export type Profile = {
   onboarded: boolean;
@@ -40,6 +46,13 @@ export type Profile = {
   name?: string;
   bottleSize: number;
   bottleStartedAt: number;
+  // Novo: dados pra calcular metabolismo
+  sex?: Sex;
+  age?: number;
+  heightCm?: number;
+  activity?: Activity;
+  targetWeightKg?: number;
+  calorieGoal?: number; // opcional, se não setar usa TDEE
 };
 
 export type Auth = { email: string; name: string } | null;
@@ -53,6 +66,10 @@ type UserBucket = {
   failedToday: boolean;
   routine: RoutineItem[];
   meals: Meal[];
+  weightLog: WeightEntry[];
+  waterLog: Record<string, number>; // dateKey -> copos
+  extrasLog: ExtraEntry[];
+  mealDone: Record<string, string[]>; // dateKey -> meal ids feitos
 };
 
 export const DEFAULT_ROUTINE: RoutineItem[] = [
@@ -81,6 +98,10 @@ type State = {
   failedToday: boolean;
   routine: RoutineItem[];
   meals: Meal[];
+  weightLog: WeightEntry[];
+  waterLog: Record<string, number>;
+  extrasLog: ExtraEntry[];
+  mealDone: Record<string, string[]>;
   signUp: (email: string, name: string, password: string) => { ok: boolean; error?: string };
   signIn: (email: string, password: string) => { ok: boolean; error?: string };
   signOut: () => void;
@@ -97,6 +118,12 @@ type State = {
   addMeal: (m: Omit<Meal, 'id'>) => void;
   updateMeal: (id: string, m: Partial<Omit<Meal, 'id'>>) => void;
   removeMeal: (id: string) => void;
+  toggleMealDone: (id: string) => void;
+  addWeight: (kg: number) => void;
+  removeWeight: (ts: number) => void;
+  addWater: (delta: number) => void;
+  addExtra: (name: string, calories: number) => void;
+  removeExtra: (id: string) => void;
   markFail: () => void;
   clearFail: () => void;
   reset: () => void;
@@ -127,6 +154,10 @@ function freshBucket(name: string, password: string): UserBucket {
     failedToday: false,
     routine: DEFAULT_ROUTINE.map((r) => ({ ...r })),
     meals: [],
+    weightLog: [],
+    waterLog: {},
+    extrasLog: [],
+    mealDone: {},
   };
 }
 
@@ -142,6 +173,10 @@ export const useStore = create<State>()(
       failedToday: false,
       routine: DEFAULT_ROUTINE.map((r) => ({ ...r })),
       meals: [],
+      weightLog: [],
+      waterLog: {},
+      extrasLog: [],
+      mealDone: {},
 
       signUp: (emailRaw, nameRaw, password) => {
         const email = normEmail(emailRaw);
@@ -164,6 +199,10 @@ export const useStore = create<State>()(
           failedToday: bucket.failedToday,
           routine: bucket.routine,
           meals: bucket.meals,
+          weightLog: bucket.weightLog,
+          waterLog: bucket.waterLog,
+          extrasLog: bucket.extrasLog,
+          mealDone: bucket.mealDone,
         });
         return { ok: true };
       },
@@ -184,6 +223,10 @@ export const useStore = create<State>()(
           failedToday: acc.failedToday,
           routine: acc.routine?.length ? acc.routine : DEFAULT_ROUTINE.map((r) => ({ ...r })),
           meals: acc.meals ?? [],
+          weightLog: acc.weightLog ?? [],
+          waterLog: acc.waterLog ?? {},
+          extrasLog: acc.extrasLog ?? [],
+          mealDone: acc.mealDone ?? {},
         });
         return { ok: true };
       },
@@ -201,6 +244,10 @@ export const useStore = create<State>()(
             failedToday: s.failedToday,
             routine: s.routine,
             meals: s.meals,
+            weightLog: s.weightLog,
+            waterLog: s.waterLog,
+            extrasLog: s.extrasLog,
+            mealDone: s.mealDone,
           };
           set({
             accounts: { ...s.accounts, [email]: bucket },
@@ -212,6 +259,10 @@ export const useStore = create<State>()(
             failedToday: false,
             routine: DEFAULT_ROUTINE.map((r) => ({ ...r })),
             meals: [],
+            weightLog: [],
+            waterLog: {},
+            extrasLog: [],
+            mealDone: {},
           });
         }
       },
@@ -255,6 +306,30 @@ export const useStore = create<State>()(
       updateMeal: (id, m) =>
         set((s) => ({ meals: s.meals.map((x) => (x.id === id ? { ...x, ...m } : x)) })),
       removeMeal: (id) => set((s) => ({ meals: s.meals.filter((x) => x.id !== id) })),
+      toggleMealDone: (id) =>
+        set((s) => {
+          const key = todayKey();
+          const list = s.mealDone[key] ?? [];
+          const next = list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+          return { mealDone: { ...s.mealDone, [key]: next } };
+        }),
+      addWeight: (kg) =>
+        set((s) => ({ weightLog: [...s.weightLog, { ts: Date.now(), kg }] })),
+      removeWeight: (ts) =>
+        set((s) => ({ weightLog: s.weightLog.filter((x) => x.ts !== ts) })),
+      addWater: (delta) =>
+        set((s) => {
+          const key = todayKey();
+          const cur = s.waterLog[key] ?? 0;
+          const next = Math.max(0, cur + delta);
+          return { waterLog: { ...s.waterLog, [key]: next } };
+        }),
+      addExtra: (name, calories) =>
+        set((s) => ({
+          extrasLog: [...s.extrasLog, { id: uid(), ts: Date.now(), name, calories }],
+        })),
+      removeExtra: (id) =>
+        set((s) => ({ extrasLog: s.extrasLog.filter((x) => x.id !== id) })),
       markFail: () => set({ failedToday: true }),
       clearFail: () => set({ failedToday: false }),
       reset: () =>
@@ -266,12 +341,16 @@ export const useStore = create<State>()(
           failedToday: false,
           routine: DEFAULT_ROUTINE.map((r) => ({ ...r })),
           meals: [],
+          weightLog: [],
+          waterLog: {},
+          extrasLog: [],
+          mealDone: {},
         }),
     }),
     {
       name: 'constancy-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 2,
+      version: 3,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
         if (version < 2) {
@@ -282,6 +361,21 @@ export const useStore = create<State>()(
               const acc = persisted.accounts[email];
               if (!acc.routine?.length) acc.routine = DEFAULT_ROUTINE.map((r) => ({ ...r }));
               if (!acc.meals) acc.meals = [];
+            }
+          }
+        }
+        if (version < 3) {
+          persisted.weightLog = persisted.weightLog ?? [];
+          persisted.waterLog = persisted.waterLog ?? {};
+          persisted.extrasLog = persisted.extrasLog ?? [];
+          persisted.mealDone = persisted.mealDone ?? {};
+          if (persisted.accounts) {
+            for (const email of Object.keys(persisted.accounts)) {
+              const acc = persisted.accounts[email];
+              acc.weightLog = acc.weightLog ?? [];
+              acc.waterLog = acc.waterLog ?? {};
+              acc.extrasLog = acc.extrasLog ?? [];
+              acc.mealDone = acc.mealDone ?? {};
             }
           }
         }

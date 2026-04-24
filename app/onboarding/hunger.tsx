@@ -20,7 +20,7 @@ export default function OnboardingHunger() {
   const router = useRouter();
   return (
     <Screen>
-      <Text style={styles.step}>PERGUNTA 2 DE 3</Text>
+      <Text style={styles.step}>PERGUNTA 2 DE 6</Text>
       <Eyebrow text="Tipo de Vontade" />
       <Text style={styles.title}>Que tipo de{'\n'}vontade te{'\n'}pega mais?</Text>
       <Text style={styles.body}>

@@ -6,16 +6,26 @@ import { TextField } from '../../src/components/TextField';
 import { Card } from '../../src/components/Card';
 import { Eyebrow } from '../../src/components/Eyebrow';
 import { useStore, Meal } from '../../src/store/useStore';
+import { formatTimeInput } from '../../src/lib/format';
+import { calorieTarget, caloriesToday } from '../../src/lib/calc';
 import { colors, font, radius } from '../../src/theme/tokens';
 
+const todayKey = () => new Date().toDateString();
+
 export default function Meals() {
-  const { meals, addMeal, updateMeal, removeMeal } = useStore();
+  const {
+    meals, addMeal, updateMeal, removeMeal, toggleMealDone, mealDone,
+    extrasLog, profile, weightLog, addExtra,
+  } = useStore();
   const [editing, setEditing] = useState<Meal | null>(null);
   const [creating, setCreating] = useState(false);
+  const [showExtra, setShowExtra] = useState(false);
 
   const sorted = useMemo(() => [...meals].sort((a, b) => a.time.localeCompare(b.time)), [meals]);
-  const totalCals = sorted.reduce((s, m) => s + (m.calories ?? 0), 0);
-  const withCals = sorted.filter((m) => m.calories && m.calories > 0).length;
+  const target = calorieTarget(profile, weightLog);
+  const consumed = caloriesToday(meals, mealDone, extrasLog);
+  const doneToday = mealDone[todayKey()] ?? [];
+  const plannedKcalToday = sorted.reduce((s, m) => s + (m.calories ?? 0), 0);
 
   return (
     <Screen>
@@ -23,30 +33,62 @@ export default function Meals() {
         <Eyebrow text="Minha Alimentação" />
         <Text style={styles.title}>O que eu{'\n'}vou comer hoje.</Text>
         <Text style={styles.sub}>
-          Anote as refeições do seu dia. Os horários e o que vai comer. Calorias só se você quiser.
+          Marque ✓ quando comer. O app soma as calorias do seu dia.
         </Text>
       </View>
 
-      {sorted.length > 0 && (
-        <Card padding={18}>
-          <View style={styles.statsRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.statVal}>{sorted.length}</Text>
-              <Text style={styles.statLabel}>refeições{'\n'}planejadas</Text>
-            </View>
-            <View style={styles.vdiv} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.statVal}>{totalCals > 0 ? totalCals : '—'}</Text>
-              <Text style={styles.statLabel}>calorias{'\n'}no total do dia</Text>
-            </View>
+      {/* Card de total do dia */}
+      <Card padding={20}>
+        <View style={styles.topRow}>
+          <View>
+            <Text style={styles.bigStat}>{consumed}</Text>
+            <Text style={styles.bigLabel}>calorias consumidas hoje</Text>
           </View>
-          {withCals > 0 && withCals < sorted.length && (
-            <Text style={styles.statHint}>
-              {sorted.length - withCals} refeição(ões) sem calorias. Pode preencher depois se quiser.
-            </Text>
+          {target && (
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={styles.targetVal}>{target}</Text>
+              <Text style={styles.targetLabel}>meta do dia</Text>
+            </View>
           )}
-        </Card>
-      )}
+        </View>
+        {target && (
+          <>
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    width: `${Math.min(100, (consumed / target) * 100)}%`,
+                    backgroundColor: consumed > target ? colors.danger : colors.green,
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.progressHint}>
+              {consumed === 0
+                ? 'Ainda não marcou nenhuma refeição hoje.'
+                : consumed < target
+                ? `Faltam ${target - consumed} calorias pra sua meta.`
+                : consumed === target
+                ? 'Chegou exatamente na meta. Ótimo.'
+                : `Passou ${consumed - target} calorias da meta. Tudo bem.`}
+            </Text>
+          </>
+        )}
+        {!target && (
+          <Text style={styles.progressHint}>
+            Preencha idade, altura e peso no seu perfil pra ver a meta do dia.
+          </Text>
+        )}
+      </Card>
+
+      <Pressable onPress={() => setShowExtra(true)} style={styles.extraBtn}>
+        <Text style={styles.extraPlus}>+</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.extraTitle}>Comi algo extra</Text>
+          <Text style={styles.extraHint}>Comeu algo fora do plano? Registra aqui.</Text>
+        </View>
+      </Pressable>
 
       {sorted.length === 0 ? (
         <Card padding={24}>
@@ -57,32 +99,48 @@ export default function Meals() {
         </Card>
       ) : (
         <View style={{ gap: 10 }}>
-          {sorted.map((m) => (
-            <Card key={m.id} padding={16}>
-              <View style={styles.mealRow}>
-                <View style={styles.timeCol}>
-                  <Text style={styles.timeTxt}>{m.time}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.mealName}>{m.name}</Text>
-                  {m.notes ? <Text style={styles.mealNotes}>{m.notes}</Text> : null}
-                  {m.calories ? (
-                    <View style={styles.calPill}>
-                      <Text style={styles.calText}>{m.calories} kcal</Text>
+          <Text style={styles.listHeader}>
+            Minhas refeições{plannedKcalToday > 0 ? ` — ${plannedKcalToday} kcal planejadas` : ''}
+          </Text>
+          {sorted.map((m) => {
+            const done = doneToday.includes(m.id);
+            return (
+              <Card key={m.id} padding={14}>
+                <View style={styles.mealRow}>
+                  <Pressable onPress={() => toggleMealDone(m.id)} style={[styles.check, done && styles.checkDone]}>
+                    {done && <Text style={styles.tick}>✓</Text>}
+                  </Pressable>
+                  <View style={styles.timeCol}>
+                    <Text style={styles.timeTxt}>{m.time}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.mealName, done && styles.mealDoneTxt]}>{m.name}</Text>
+                    {m.notes ? <Text style={styles.mealNotes}>{m.notes}</Text> : null}
+                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                      {m.calories ? (
+                        <View style={styles.calPill}>
+                          <Text style={styles.calText}>{m.calories} kcal</Text>
+                        </View>
+                      ) : null}
+                      {m.recurring && (
+                        <View style={styles.recurPill}>
+                          <Text style={styles.recurText}>todo dia</Text>
+                        </View>
+                      )}
                     </View>
-                  ) : null}
+                  </View>
                 </View>
-              </View>
-              <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
-                <Pressable onPress={() => setEditing(m)} style={styles.smallBtn}>
-                  <Text style={styles.smallBtnText}>Editar</Text>
-                </Pressable>
-                <Pressable onPress={() => removeMeal(m.id)} style={styles.smallBtnDanger}>
-                  <Text style={styles.smallBtnDangerText}>Apagar</Text>
-                </Pressable>
-              </View>
-            </Card>
-          ))}
+                <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                  <Pressable onPress={() => setEditing(m)} style={styles.smallBtn}>
+                    <Text style={styles.smallBtnText}>Editar</Text>
+                  </Pressable>
+                  <Pressable onPress={() => removeMeal(m.id)} style={styles.smallBtnDanger}>
+                    <Text style={styles.smallBtnDangerText}>Apagar</Text>
+                  </Pressable>
+                </View>
+              </Card>
+            );
+          })}
         </View>
       )}
 
@@ -111,6 +169,21 @@ export default function Meals() {
           }}
         />
       </Modal>
+
+      <Modal
+        visible={showExtra}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowExtra(false)}
+      >
+        <ExtraForm
+          onCancel={() => setShowExtra(false)}
+          onSave={(name, cal) => {
+            addExtra(name, cal);
+            setShowExtra(false);
+          }}
+        />
+      </Modal>
     </Screen>
   );
 }
@@ -128,6 +201,7 @@ function MealForm({
   const [time, setTime] = useState(initial?.time ?? '');
   const [calories, setCalories] = useState(initial?.calories ? String(initial.calories) : '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
+  const [recurring, setRecurring] = useState(initial?.recurring ?? true);
 
   return (
     <View style={styles.modalBg}>
@@ -148,11 +222,12 @@ function MealForm({
           />
           <TextField
             label="Horário"
-            hint="Formato 00:00. Ex: 12:30"
+            hint="Digite os números. O app coloca os dois-pontos sozinho (ex: 1230 vira 12:30)."
             value={time}
-            onChangeText={setTime}
+            onChangeText={(v) => setTime(formatTimeInput(v))}
             placeholder="12:30"
             keyboardType="numeric"
+            maxLength={5}
           />
           <TextField
             label="Calorias (opcional)"
@@ -169,7 +244,20 @@ function MealForm({
             onChangeText={setNotes}
             placeholder="Ex: Com pouco sal"
           />
+
+          <Pressable onPress={() => setRecurring(!recurring)} style={styles.recurRow}>
+            <View style={[styles.recurBox, recurring && styles.recurBoxOn]}>
+              {recurring && <Text style={styles.recurCheck}>✓</Text>}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.recurLabel}>Repetir todo dia</Text>
+              <Text style={styles.recurSub}>
+                Se marcado, essa refeição fica salva como sua rotina. Aparece todo dia pra você marcar.
+              </Text>
+            </View>
+          </Pressable>
         </View>
+
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 22 }}>
           <View style={{ flex: 1 }}>
             <Button label="Cancelar" variant="outline" onPress={onCancel} />
@@ -177,15 +265,97 @@ function MealForm({
           <View style={{ flex: 1.3 }}>
             <Button
               label="Salvar"
-              disabled={!name || !time}
+              disabled={!name || time.length < 4}
               onPress={() =>
                 onSave({
                   name: name.trim(),
                   time: time.trim(),
                   calories: calories ? Number(calories) : undefined,
                   notes: notes.trim() || undefined,
+                  recurring,
                 })
               }
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const QUICK_EXTRAS: { name: string; kcal: number }[] = [
+  { name: 'Pedaço de bolo', kcal: 250 },
+  { name: 'Brigadeiro', kcal: 120 },
+  { name: 'Chocolate (1 barra pequena)', kcal: 200 },
+  { name: 'Biscoito recheado (4)', kcal: 180 },
+  { name: 'Hambúrguer', kcal: 550 },
+  { name: 'Pizza (1 fatia)', kcal: 280 },
+  { name: 'Refrigerante (lata)', kcal: 140 },
+  { name: 'Salgadinho (pacote)', kcal: 320 },
+  { name: 'Pão de queijo', kcal: 120 },
+  { name: 'Sorvete (1 bola)', kcal: 150 },
+];
+
+function ExtraForm({
+  onSave,
+  onCancel,
+}: {
+  onSave: (name: string, kcal: number) => void;
+  onCancel: () => void;
+}) {
+  const [name, setName] = useState('');
+  const [cal, setCal] = useState('');
+
+  return (
+    <View style={styles.modalBg}>
+      <View style={styles.modalCard}>
+        <Eyebrow text="Comi Algo Extra" />
+        <Text style={styles.modalTitle}>Ninguém é{'\n'}de ferro.</Text>
+        <Text style={styles.extraIntro}>
+          Escolha da lista rápida ou digite você mesmo. Serve só pra você acompanhar.
+        </Text>
+
+        <Text style={styles.extraSection}>LISTA RÁPIDA</Text>
+        <View style={styles.quickGrid}>
+          {QUICK_EXTRAS.map((q) => (
+            <Pressable
+              key={q.name}
+              onPress={() => onSave(q.name, q.kcal)}
+              style={styles.quickChip}
+            >
+              <Text style={styles.quickName}>{q.name}</Text>
+              <Text style={styles.quickKcal}>{q.kcal} kcal</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Text style={[styles.extraSection, { marginTop: 18 }]}>OU DIGITAR</Text>
+        <View style={{ gap: 14, marginTop: 10 }}>
+          <TextField
+            label="O que foi?"
+            value={name}
+            onChangeText={setName}
+            placeholder="Ex: Coxinha na padaria"
+          />
+          <TextField
+            label="Calorias (se souber)"
+            hint="Se não tiver ideia, coloque um chute. Ex: 200"
+            value={cal}
+            onChangeText={(v) => setCal(v.replace(/[^0-9]/g, ''))}
+            keyboardType="numeric"
+            placeholder="Ex: 250"
+          />
+        </View>
+
+        <View style={{ flexDirection: 'row', gap: 10, marginTop: 22 }}>
+          <View style={{ flex: 1 }}>
+            <Button label="Cancelar" variant="outline" onPress={onCancel} />
+          </View>
+          <View style={{ flex: 1.3 }}>
+            <Button
+              label="Salvar"
+              disabled={!name || !cal}
+              onPress={() => onSave(name.trim(), Number(cal))}
             />
           </View>
         </View>
@@ -205,25 +375,87 @@ const styles = StyleSheet.create({
     letterSpacing: -0.9,
   },
   sub: { color: colors.textMuted, fontSize: 15, lineHeight: 23, marginTop: 10, letterSpacing: -0.1 },
-  statsRow: { flexDirection: 'row', alignItems: 'center' },
-  vdiv: { width: 1, alignSelf: 'stretch', backgroundColor: colors.navyBorder, marginHorizontal: 14 },
-  statVal: {
+  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  bigStat: {
     color: colors.textLight,
-    fontSize: 32,
+    fontSize: 44,
     fontWeight: '600',
-    letterSpacing: -1.2,
+    letterSpacing: -1.8,
     fontFamily: font.numeric,
   },
-  statLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '500', marginTop: 5, lineHeight: 16, letterSpacing: -0.1 },
-  statHint: { color: colors.textDim, fontSize: 12.5, marginTop: 14, fontStyle: 'italic', lineHeight: 18, letterSpacing: -0.1 },
+  bigLabel: { color: colors.textMuted, fontSize: 12, marginTop: 4, letterSpacing: -0.1 },
+  targetVal: {
+    color: colors.green,
+    fontSize: 22,
+    fontWeight: '600',
+    letterSpacing: -0.8,
+    fontFamily: font.numeric,
+  },
+  targetLabel: { color: colors.textDim, fontSize: 11, marginTop: 2, letterSpacing: 0.4, fontFamily: font.numeric },
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    marginTop: 16,
+    overflow: 'hidden',
+  },
+  progressFill: { height: '100%', borderRadius: 4 },
+  progressHint: { color: colors.textMuted, fontSize: 13.5, marginTop: 10, fontStyle: 'italic', letterSpacing: -0.1 },
+
+  extraBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: 'rgba(236,121,53,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(236,121,53,0.4)',
+    borderRadius: radius.md,
+    padding: 16,
+  },
+  extraPlus: {
+    width: 36,
+    height: 36,
+    textAlign: 'center',
+    lineHeight: 34,
+    fontSize: 22,
+    color: '#EC7935',
+    fontWeight: '700',
+    fontFamily: font.numeric,
+    backgroundColor: 'rgba(236,121,53,0.18)',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(236,121,53,0.4)',
+  },
+  extraTitle: { color: colors.textLight, fontSize: 16, fontWeight: '600', letterSpacing: -0.2 },
+  extraHint: { color: colors.textMuted, fontSize: 13, marginTop: 3, fontStyle: 'italic', letterSpacing: -0.1 },
+
+  listHeader: { color: colors.textDim, fontSize: 11, letterSpacing: 1.6, fontWeight: '600', fontFamily: font.numeric, marginTop: 4, marginBottom: 2 },
   emptyTitle: { color: colors.textLight, fontSize: 24, fontFamily: font.serif, fontStyle: 'italic', letterSpacing: -0.5 },
   emptySub: { color: colors.textMuted, fontSize: 15, lineHeight: 23, marginTop: 10, letterSpacing: -0.1 },
-  mealRow: { flexDirection: 'row', gap: 14, alignItems: 'flex-start' },
+  mealRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+  check: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: colors.navyBorderHi,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  checkDone: {
+    backgroundColor: colors.green,
+    borderColor: colors.green,
+    shadowColor: colors.green,
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+  },
+  tick: { color: '#06240F', fontWeight: '900', fontSize: 16 },
   timeCol: {
-    minWidth: 72,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
+    minWidth: 64,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
     backgroundColor: 'rgba(34,197,94,0.12)',
     borderWidth: 1,
     borderColor: 'rgba(34,197,94,0.3)',
@@ -231,22 +463,31 @@ const styles = StyleSheet.create({
   },
   timeTxt: {
     color: colors.green,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     letterSpacing: 0.3,
     fontFamily: font.numeric,
   },
-  mealName: { color: colors.textLight, fontSize: 17, fontWeight: '600', letterSpacing: -0.3 },
-  mealNotes: { color: colors.textMuted, fontSize: 13, marginTop: 5, fontStyle: 'italic', letterSpacing: -0.1 },
+  mealName: { color: colors.textLight, fontSize: 16.5, fontWeight: '600', letterSpacing: -0.2 },
+  mealDoneTxt: { textDecorationLine: 'line-through', color: colors.textDim },
+  mealNotes: { color: colors.textMuted, fontSize: 13, marginTop: 4, fontStyle: 'italic', letterSpacing: -0.1 },
   calPill: {
-    alignSelf: 'flex-start',
-    marginTop: 10,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
     backgroundColor: 'rgba(255,255,255,0.06)',
   },
   calText: { color: colors.textLight, fontSize: 12, fontWeight: '600', letterSpacing: 0.2, fontFamily: font.numeric },
+  recurPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: 'rgba(34,197,94,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(34,197,94,0.3)',
+  },
+  recurText: { color: colors.green, fontSize: 11, fontWeight: '600', letterSpacing: 0.4, fontFamily: font.numeric },
+
   smallBtn: {
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -265,6 +506,31 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(248,113,113,0.3)',
   },
   smallBtnDangerText: { color: colors.danger, fontSize: 12.5, fontWeight: '600', letterSpacing: 0.6, fontFamily: font.numeric },
+
+  recurRow: {
+    flexDirection: 'row',
+    gap: 14,
+    alignItems: 'flex-start',
+    padding: 14,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(34,197,94,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(34,197,94,0.2)',
+  },
+  recurBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: colors.navyBorderHi,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recurBoxOn: { backgroundColor: colors.green, borderColor: colors.green },
+  recurCheck: { color: '#06240F', fontWeight: '900', fontSize: 14 },
+  recurLabel: { color: colors.textLight, fontSize: 15, fontWeight: '600', letterSpacing: -0.2 },
+  recurSub: { color: colors.textMuted, fontSize: 13, marginTop: 3, lineHeight: 19, fontStyle: 'italic', letterSpacing: -0.1 },
+
   modalBg: {
     flex: 1,
     backgroundColor: 'rgba(5,14,31,0.85)',
@@ -275,6 +541,7 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 520,
+    maxHeight: '90%',
     backgroundColor: colors.navy,
     borderRadius: radius.lg,
     borderWidth: 1,
@@ -290,4 +557,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
     letterSpacing: -0.7,
   },
+  extraIntro: { color: colors.textMuted, fontSize: 14.5, lineHeight: 22, marginTop: 12, letterSpacing: -0.1 },
+  extraSection: { color: colors.textDim, fontSize: 11, letterSpacing: 1.8, fontWeight: '700', fontFamily: font.numeric, marginTop: 18 },
+  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+  quickChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(236,121,53,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(236,121,53,0.3)',
+  },
+  quickName: { color: colors.textLight, fontSize: 13, fontWeight: '600', letterSpacing: -0.1 },
+  quickKcal: { color: '#EC7935', fontSize: 11, marginTop: 2, fontWeight: '600', fontFamily: font.numeric, letterSpacing: 0.3 },
 });

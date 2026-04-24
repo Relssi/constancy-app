@@ -7,6 +7,7 @@ import { TextField } from '../src/components/TextField';
 import { Card } from '../src/components/Card';
 import { Eyebrow } from '../src/components/Eyebrow';
 import { useStore, RoutineItem as RI } from '../src/store/useStore';
+import { formatTimeInput } from '../src/lib/format';
 import { colors, font, radius } from '../src/theme/tokens';
 
 export default function RoutineEditor() {
@@ -127,11 +128,12 @@ function RoutineForm({
           />
           <TextField
             label="Horário"
-            hint="Formato 00:00. Ex: 07:30"
+            hint="Digite os números. O app coloca os dois-pontos sozinho (ex: 0730 vira 07:30)."
             value={time}
-            onChangeText={setTime}
+            onChangeText={(v) => setTime(formatTimeInput(v))}
             placeholder="07:30"
             keyboardType="numeric"
+            maxLength={5}
           />
         </View>
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 22 }}>

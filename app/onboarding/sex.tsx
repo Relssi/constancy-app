@@ -5,45 +5,33 @@ import { Screen } from '../../src/components/Screen';
 import { Button } from '../../src/components/Button';
 import { Pill } from '../../src/components/Pill';
 import { Eyebrow } from '../../src/components/Eyebrow';
-import { useStore, TimeSlot } from '../../src/store/useStore';
+import { useStore, Sex } from '../../src/store/useStore';
 import { colors, font } from '../../src/theme/tokens';
 
-const OPTIONS: { v: TimeSlot; label: string; hint: string }[] = [
-  { v: 'morning', label: 'Manhã', hint: 'Ao acordar, antes do café' },
-  { v: 'afternoon', label: 'Tarde', hint: 'Depois do almoço, vontade de doce' },
-  { v: 'night', label: 'Noite', hint: 'Depois das 20h, em frente à TV' },
-];
-
-export default function OnboardingSlot() {
-  const [sel, setSel] = useState<TimeSlot | null>(null);
+export default function OnboardingSex() {
+  const [sel, setSel] = useState<Sex | null>(null);
   const setProfile = useStore((s) => s.setProfile);
   const router = useRouter();
+
   return (
     <Screen>
-      <Text style={styles.step}>PERGUNTA 1 DE 6</Text>
-      <Eyebrow text="Sua Hora Difícil" />
-      <Text style={styles.title}>Qual a hora{'\n'}mais difícil{'\n'}do seu dia?</Text>
+      <Text style={styles.step}>PERGUNTA 4 DE 6</Text>
+      <Eyebrow text="Sobre Você" />
+      <Text style={styles.title}>Você é{'\n'}homem ou mulher?</Text>
       <Text style={styles.body}>
-        A hora que bate mais vontade de comer. O aplicativo vai te ajudar nesse momento.
+        Isso ajuda o aplicativo a calcular quantas calorias seu corpo gasta por dia.
       </Text>
       <View style={{ gap: 12, marginTop: 8 }}>
-        {OPTIONS.map((o) => (
-          <Pill
-            key={o.v}
-            label={`${o.label}  —  ${o.hint}`}
-            active={sel === o.v}
-            onPress={() => setSel(o.v)}
-            style={{ paddingVertical: 20 }}
-          />
-        ))}
+        <Pill label="Mulher" active={sel === 'female'} onPress={() => setSel('female')} style={{ paddingVertical: 20 }} />
+        <Pill label="Homem" active={sel === 'male'} onPress={() => setSel('male')} style={{ paddingVertical: 20 }} />
       </View>
       <View style={{ flex: 1 }} />
       <Button
         label="Continuar"
         disabled={!sel}
         onPress={() => {
-          if (sel) setProfile({ lossSlot: sel });
-          router.push('/onboarding/hunger');
+          if (sel) setProfile({ sex: sel });
+          router.push('/onboarding/body');
         }}
       />
     </Screen>

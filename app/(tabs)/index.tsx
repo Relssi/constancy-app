@@ -9,7 +9,10 @@ import { Tutorial } from '../../src/components/Tutorial';
 import { useStore } from '../../src/store/useStore';
 import { currentStreak, bestStreak, monthRate } from '../../src/lib/streak';
 import { nextIntervention, constancyAdherence, daysActive } from '../../src/lib/personalization';
+import { calorieTarget, caloriesToday } from '../../src/lib/calc';
 import { colors, font } from '../../src/theme/tokens';
+
+const todayKey = () => new Date().toDateString();
 
 export default function Home() {
   const router = useRouter();
@@ -23,6 +26,12 @@ export default function Home() {
     finishTutorial,
     routine,
     meals,
+    mealDone,
+    extrasLog,
+    weightLog,
+    waterLog,
+    addWater,
+    toggleMealDone,
   } = useStore();
   const streak = currentStreak(constancyLog);
   const best = bestStreak(constancyLog);
@@ -36,7 +45,10 @@ export default function Home() {
 
   const sortedMeals = [...meals].sort((a, b) => a.time.localeCompare(b.time));
   const displayMeals = sortedMeals.slice(0, 3);
-  const totalCals = sortedMeals.reduce((s, m) => s + (m.calories ?? 0), 0);
+  const target = calorieTarget(profile, weightLog);
+  const consumed = caloriesToday(meals, mealDone, extrasLog);
+  const doneToday = mealDone[todayKey()] ?? [];
+  const waterCups = waterLog[todayKey()] ?? 0;
 
   return (
     <Screen>
@@ -158,39 +170,98 @@ export default function Home() {
             />
           ))}
         </View>
-        <Pressable onPress={() => router.push('/routine')} style={styles.manageBtn}>
-          <Text style={styles.manageBtnText}>✎ Organizar minha rotina</Text>
+      </View>
+
+      {/* Calorias do dia */}
+      <View>
+        <View style={styles.sectionHead}>
+          <Eyebrow text="Calorias De Hoje" />
+          {target && (
+            <View style={styles.countBadge}>
+              <Text style={styles.sectionCount}>meta {target} kcal</Text>
+            </View>
+          )}
+        </View>
+        <Pressable onPress={() => router.push('/meals')}>
+          <Card padding={20}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+              <View>
+                <Text style={styles.calBig}>{consumed}</Text>
+                <Text style={styles.calBigLabel}>
+                  {target ? `de ${target} kcal consumidas` : 'kcal consumidas hoje'}
+                </Text>
+              </View>
+              {target && (
+                <Text style={[
+                  styles.calStatus,
+                  consumed > target ? { color: '#F8B44B' } : { color: colors.green },
+                ]}>
+                  {consumed === 0
+                    ? 'começar'
+                    : consumed < target
+                    ? `faltam ${target - consumed}`
+                    : consumed === target
+                    ? 'na meta'
+                    : `+${consumed - target}`}
+                </Text>
+              )}
+            </View>
+            {target && (
+              <View style={styles.calTrack}>
+                <View
+                  style={[
+                    styles.calFill,
+                    {
+                      width: `${Math.min(100, (consumed / target) * 100)}%`,
+                      backgroundColor: consumed > target ? '#F8B44B' : colors.green,
+                    },
+                  ]}
+                />
+              </View>
+            )}
+          </Card>
         </Pressable>
       </View>
 
+      {/* Refeições do dia com check */}
       <View>
         <View style={styles.sectionHead}>
           <Eyebrow text="Minhas Refeições" />
-          {totalCals > 0 && (
+          {sortedMeals.length > 0 && (
             <View style={styles.countBadge}>
-              <Text style={styles.sectionCount}>{totalCals} kcal</Text>
+              <Text style={styles.sectionCount}>{doneToday.length} de {sortedMeals.length}</Text>
             </View>
           )}
         </View>
         <Text style={styles.sectionHint}>
           {sortedMeals.length === 0
-            ? 'Você ainda não anotou suas refeições de hoje.'
-            : 'O que você planejou pra comer hoje, em ordem.'}
+            ? 'Você ainda não anotou suas refeições.'
+            : 'Marque ✓ quando comer. O app soma as calorias.'}
         </Text>
         <View style={{ gap: 10, marginTop: 12 }}>
-          {displayMeals.map((m) => (
-            <Card key={m.id} padding={14}>
-              <View style={styles.mealRow}>
-                <View style={styles.mealTime}>
-                  <Text style={styles.mealTimeTxt}>{m.time}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.mealName}>{m.name}</Text>
-                  {m.calories ? <Text style={styles.mealCal}>{m.calories} kcal</Text> : null}
-                </View>
-              </View>
-            </Card>
-          ))}
+          {displayMeals.map((m) => {
+            const d = doneToday.includes(m.id);
+            return (
+              <Pressable key={m.id} onPress={() => toggleMealDone(m.id)}>
+                <Card padding={14}>
+                  <View style={styles.mealRow}>
+                    <View style={[styles.mealCheck, d && styles.mealCheckOn]}>
+                      {d && <Text style={styles.mealCheckTxt}>✓</Text>}
+                    </View>
+                    <View style={styles.mealTime}>
+                      <Text style={styles.mealTimeTxt}>{m.time}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.mealName, d && { textDecorationLine: 'line-through', color: colors.textDim }]}>
+                        {m.name}
+                      </Text>
+                      {m.calories ? <Text style={styles.mealCal}>{m.calories} kcal</Text> : null}
+                    </View>
+                  </View>
+                </Card>
+              </Pressable>
+            );
+          })}
         </View>
         <Pressable onPress={() => router.push('/meals')} style={styles.manageBtn}>
           <Text style={styles.manageBtnText}>
@@ -201,6 +272,41 @@ export default function Home() {
               : '✎ Organizar refeições'}
           </Text>
         </Pressable>
+      </View>
+
+      {/* Água */}
+      <View>
+        <Eyebrow text="Água De Hoje" />
+        <Card padding={20}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View>
+              <Text style={styles.waterBig}>{waterCups}</Text>
+              <Text style={styles.waterLabel}>
+                {waterCups === 1 ? 'copo tomado hoje' : 'copos tomados hoje'}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Pressable onPress={() => addWater(-1)} style={[styles.waterBtn, styles.waterBtnMinus]}>
+                <Text style={styles.waterBtnTxt}>−</Text>
+              </Pressable>
+              <Pressable onPress={() => addWater(1)} style={styles.waterBtn}>
+                <Text style={styles.waterBtnTxt}>+</Text>
+              </Pressable>
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 6, marginTop: 16 }}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.waterDrop,
+                  i < waterCups && styles.waterDropOn,
+                ]}
+              />
+            ))}
+          </View>
+          <Text style={styles.waterHint}>Meta boa: 8 copos por dia.</Text>
+        </Card>
       </View>
 
       <Card variant="accent" padding={22}>
@@ -561,5 +667,97 @@ const styles = StyleSheet.create({
     marginTop: 8,
     letterSpacing: -0.5,
     lineHeight: 30,
+  },
+  calBig: {
+    color: colors.textLight,
+    fontSize: 44,
+    fontWeight: '600',
+    letterSpacing: -1.8,
+    fontFamily: font.numeric,
+  },
+  calBigLabel: {
+    color: colors.textMuted,
+    fontSize: 12.5,
+    marginTop: 3,
+    letterSpacing: -0.1,
+  },
+  calStatus: {
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+    fontFamily: font.numeric,
+    marginBottom: 4,
+  },
+  calTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    marginTop: 16,
+    overflow: 'hidden',
+  },
+  calFill: { height: '100%', borderRadius: 4 },
+  mealCheck: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: colors.navyBorderHi,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mealCheckOn: {
+    backgroundColor: colors.green,
+    borderColor: colors.green,
+    shadowColor: colors.green,
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+  },
+  mealCheckTxt: { color: '#06240F', fontWeight: '900', fontSize: 15 },
+  waterBig: {
+    color: colors.textLight,
+    fontSize: 40,
+    fontWeight: '600',
+    letterSpacing: -1.6,
+    fontFamily: font.numeric,
+  },
+  waterLabel: { color: colors.textMuted, fontSize: 12.5, marginTop: 3, letterSpacing: -0.1 },
+  waterBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(34,197,94,0.18)',
+    borderWidth: 1,
+    borderColor: colors.green,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waterBtnMinus: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderColor: colors.navyBorder,
+  },
+  waterBtnTxt: {
+    color: colors.textLight,
+    fontSize: 22,
+    fontWeight: '600',
+    fontFamily: font.numeric,
+  },
+  waterDrop: {
+    flex: 1,
+    height: 10,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  waterDropOn: {
+    backgroundColor: 'rgba(60,175,255,0.35)',
+    borderColor: 'rgba(60,175,255,0.6)',
+  },
+  waterHint: {
+    color: colors.textMuted,
+    fontSize: 12.5,
+    marginTop: 10,
+    fontStyle: 'italic',
+    letterSpacing: -0.1,
   },
 });

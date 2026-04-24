@@ -5,26 +5,29 @@ import { Screen } from '../../src/components/Screen';
 import { Button } from '../../src/components/Button';
 import { Pill } from '../../src/components/Pill';
 import { Eyebrow } from '../../src/components/Eyebrow';
-import { useStore, TimeSlot } from '../../src/store/useStore';
+import { useStore, Activity } from '../../src/store/useStore';
+import { scheduleCheckInReminders, requestPermission } from '../../src/lib/notifications';
 import { colors, font } from '../../src/theme/tokens';
 
-const OPTIONS: { v: TimeSlot; label: string; hint: string }[] = [
-  { v: 'morning', label: 'Manhã', hint: 'Ao acordar, antes do café' },
-  { v: 'afternoon', label: 'Tarde', hint: 'Depois do almoço, vontade de doce' },
-  { v: 'night', label: 'Noite', hint: 'Depois das 20h, em frente à TV' },
+const OPTIONS: { v: Activity; label: string; hint: string }[] = [
+  { v: 'sedentary', label: 'Fico mais parado', hint: 'Trabalho sentado, pouco movimento' },
+  { v: 'light', label: 'Ando um pouco', hint: 'Caminho 1 ou 2 vezes na semana' },
+  { v: 'moderate', label: 'Me mexo bastante', hint: 'Exercício 3 a 4 vezes na semana' },
+  { v: 'active', label: 'Sou bem ativo', hint: 'Exercício quase todo dia' },
 ];
 
-export default function OnboardingSlot() {
-  const [sel, setSel] = useState<TimeSlot | null>(null);
-  const setProfile = useStore((s) => s.setProfile);
+export default function OnboardingActivity() {
+  const [sel, setSel] = useState<Activity | null>(null);
+  const { setProfile, finishOnboarding, profile } = useStore();
   const router = useRouter();
+
   return (
     <Screen>
-      <Text style={styles.step}>PERGUNTA 1 DE 6</Text>
-      <Eyebrow text="Sua Hora Difícil" />
-      <Text style={styles.title}>Qual a hora{'\n'}mais difícil{'\n'}do seu dia?</Text>
+      <Text style={styles.step}>PERGUNTA 6 DE 6</Text>
+      <Eyebrow text="Seu Dia a Dia" />
+      <Text style={styles.title}>Como é seu{'\n'}dia a dia?</Text>
       <Text style={styles.body}>
-        A hora que bate mais vontade de comer. O aplicativo vai te ajudar nesse momento.
+        Não precisa ser exato. Escolha o que chega mais perto da sua rotina.
       </Text>
       <View style={{ gap: 12, marginTop: 8 }}>
         {OPTIONS.map((o) => (
@@ -39,11 +42,14 @@ export default function OnboardingSlot() {
       </View>
       <View style={{ flex: 1 }} />
       <Button
-        label="Continuar"
+        label="Pronto, ativar aplicativo"
         disabled={!sel}
-        onPress={() => {
-          if (sel) setProfile({ lossSlot: sel });
-          router.push('/onboarding/hunger');
+        onPress={async () => {
+          if (sel) setProfile({ activity: sel });
+          finishOnboarding();
+          await requestPermission();
+          await scheduleCheckInReminders(profile.lossSlot);
+          router.replace('/');
         }}
       />
     </Screen>

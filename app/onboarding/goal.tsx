@@ -6,7 +6,6 @@ import { Button } from '../../src/components/Button';
 import { Pill } from '../../src/components/Pill';
 import { Eyebrow } from '../../src/components/Eyebrow';
 import { useStore, Goal } from '../../src/store/useStore';
-import { scheduleCheckInReminders, requestPermission } from '../../src/lib/notifications';
 import { colors, font } from '../../src/theme/tokens';
 
 const OPTIONS: { v: Goal; label: string; hint: string }[] = [
@@ -17,12 +16,12 @@ const OPTIONS: { v: Goal; label: string; hint: string }[] = [
 
 export default function OnboardingGoal() {
   const [sel, setSel] = useState<Goal | null>(null);
-  const { setProfile, finishOnboarding, profile } = useStore();
+  const setProfile = useStore((s) => s.setProfile);
   const router = useRouter();
 
   return (
     <Screen>
-      <Text style={styles.step}>PERGUNTA 3 DE 3</Text>
+      <Text style={styles.step}>PERGUNTA 3 DE 6</Text>
       <Eyebrow text="Seu Objetivo" />
       <Text style={styles.title}>O que você{'\n'}quer alcançar?</Text>
       <Text style={styles.body}>
@@ -41,14 +40,11 @@ export default function OnboardingGoal() {
       </View>
       <View style={{ flex: 1 }} />
       <Button
-        label="Pronto, ativar aplicativo"
+        label="Continuar"
         disabled={!sel}
-        onPress={async () => {
+        onPress={() => {
           if (sel) setProfile({ goal: sel });
-          finishOnboarding();
-          await requestPermission();
-          await scheduleCheckInReminders(profile.lossSlot);
-          router.replace('/');
+          router.push('/onboarding/sex');
         }}
       />
     </Screen>
