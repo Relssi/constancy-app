@@ -4,7 +4,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Screen } from '../../src/components/Screen';
 import { Card } from '../../src/components/Card';
 import { Eyebrow } from '../../src/components/Eyebrow';
-import { RoutineItem } from '../../src/components/RoutineItem';
 import { Tutorial } from '../../src/components/Tutorial';
 import { useStore } from '../../src/store/useStore';
 import { currentStreak, bestStreak, monthRate } from '../../src/lib/streak';
@@ -20,11 +19,8 @@ export default function Home() {
     profile,
     checkIns,
     constancyLog,
-    routineDone,
-    toggleRoutine,
     failedToday,
     finishTutorial,
-    routine,
     meals,
     mealDone,
     extrasLog,
@@ -38,8 +34,6 @@ export default function Home() {
   const rate = monthRate(constancyLog);
   const adherence = constancyAdherence(constancyLog, 7);
   const answered = daysActive(checkIns, 7);
-  const key = new Date().toDateString();
-  const done = routineDone[key] ?? [];
   const intervention = nextIntervention(profile, checkIns);
   const showTutorial = profile.onboarded && !profile.tutorialSeen;
 
@@ -148,29 +142,6 @@ export default function Home() {
         </Card>
       </Pressable>
 
-      <View>
-        <View style={styles.sectionHead}>
-          <Eyebrow text="Minha Rotina de Hoje" />
-          <View style={styles.countBadge}>
-            <Text style={styles.sectionCount}>
-              {done.length} de {routine.length}
-            </Text>
-          </View>
-        </View>
-        <Text style={styles.sectionHint}>Toque na bolinha quando terminar cada etapa.</Text>
-        <View style={{ gap: 10, marginTop: 12 }}>
-          {routine.map((r) => (
-            <RoutineItem
-              key={r.id}
-              label={r.label}
-              detail={r.detail}
-              time={r.time}
-              done={done.includes(r.id)}
-              onToggle={() => toggleRoutine(r.id)}
-            />
-          ))}
-        </View>
-      </View>
 
       {/* Calorias do dia */}
       <View>
