@@ -56,14 +56,15 @@ export default function OnboardingGoal() {
 }
 
 const styles = StyleSheet.create({
-  step: { color: colors.green, fontWeight: '800', letterSpacing: 2, fontSize: 13 },
+  step: { color: colors.green, fontWeight: '700', letterSpacing: 2.4, fontSize: 11, fontFamily: font.numeric },
   title: {
     color: colors.textLight,
-    fontSize: 36,
+    fontSize: 38,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 42,
-    marginTop: 4,
+    lineHeight: 44,
+    marginTop: 8,
+    letterSpacing: -0.8,
   },
-  body: { color: colors.textMuted, fontSize: 16, lineHeight: 25 },
+  body: { color: colors.textMuted, fontSize: 15.5, lineHeight: 24, letterSpacing: -0.1 },
 });

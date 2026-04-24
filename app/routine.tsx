@@ -152,22 +152,23 @@ function RoutineForm({
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.textMuted, fontSize: 16, fontWeight: '700' },
+  back: { color: colors.textMuted, fontSize: 15, fontWeight: '600', fontFamily: font.numeric, letterSpacing: -0.1 },
   title: {
     color: colors.textLight,
-    fontSize: 36,
+    fontSize: 40,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 42,
-    marginTop: 8,
+    lineHeight: 46,
+    marginTop: 12,
+    letterSpacing: -0.9,
   },
-  sub: { color: colors.textMuted, fontSize: 15, lineHeight: 24, marginTop: 10 },
+  sub: { color: colors.textMuted, fontSize: 15, lineHeight: 23, marginTop: 10, letterSpacing: -0.1 },
   row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  itemLabel: { color: colors.textLight, fontSize: 17, fontWeight: '700' },
-  itemDetail: { color: colors.textMuted, fontSize: 14, marginTop: 3 },
+  itemLabel: { color: colors.textLight, fontSize: 16.5, fontWeight: '600', letterSpacing: -0.2 },
+  itemDetail: { color: colors.textMuted, fontSize: 13.5, marginTop: 4, letterSpacing: -0.1 },
   timePill: {
     alignSelf: 'flex-start',
-    marginTop: 8,
+    marginTop: 10,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(34,197,94,0.3)',
   },
-  timeText: { color: colors.green, fontSize: 12, fontWeight: '800', letterSpacing: 1.2 },
+  timeText: { color: colors.green, fontSize: 12, fontWeight: '600', letterSpacing: 1, fontFamily: font.numeric },
   iconBtn: {
     width: 36,
     height: 36,
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.navyBorder,
   },
-  iconBtnText: { color: colors.textLight, fontSize: 18, fontWeight: '900' },
+  iconBtnText: { color: colors.textLight, fontSize: 17, fontWeight: '700', fontFamily: font.numeric },
   smallBtn: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.navyBorder,
   },
-  smallBtnText: { color: colors.textLight, fontSize: 12, fontWeight: '800', letterSpacing: 1 },
+  smallBtnText: { color: colors.textLight, fontSize: 12, fontWeight: '600', letterSpacing: 0.6, fontFamily: font.numeric },
   smallBtnDanger: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(248,113,113,0.3)',
   },
-  smallBtnDangerText: { color: colors.danger, fontSize: 12, fontWeight: '800', letterSpacing: 1 },
+  smallBtnDangerText: { color: colors.danger, fontSize: 12, fontWeight: '600', letterSpacing: 0.6, fontFamily: font.numeric },
   modalBg: {
     flex: 1,
     backgroundColor: 'rgba(5,14,31,0.85)',
@@ -223,10 +224,11 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: colors.textLight,
-    fontSize: 28,
+    fontSize: 30,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 34,
-    marginTop: 6,
+    lineHeight: 36,
+    marginTop: 8,
+    letterSpacing: -0.7,
   },
 });

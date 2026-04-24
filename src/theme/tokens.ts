@@ -33,8 +33,21 @@ export const gradients = {
 };
 
 export const font = {
-  serif: 'Playfair Display, Georgia, "Times New Roman", serif',
+  serif: 'Fraunces, Georgia, "Times New Roman", serif',
   sans: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  numeric: '"Space Grotesk", Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+};
+
+// Tracking tokens (RN letterSpacing is in points, not em — use per-size)
+export const tracking = {
+  // -0.02em equivalents at common sizes
+  tight: -0.3,
+  tighter: -0.6,
+  tightest: -1.2,
+  normal: 0,
+  loose: 0.4,
+  caps: 1.2,
+  capsWide: 2,
 };
 
 export const radius = {

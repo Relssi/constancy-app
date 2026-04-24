@@ -62,16 +62,17 @@ function Step({ n, text }: { n: string; text: string }) {
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.textMuted, fontSize: 16, fontWeight: '700' },
+  back: { color: colors.textMuted, fontSize: 15, fontWeight: '600', fontFamily: font.numeric, letterSpacing: -0.1 },
   title: {
     color: colors.textLight,
-    fontSize: 36,
+    fontSize: 38,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 42,
-    marginTop: 8,
+    lineHeight: 44,
+    marginTop: 10,
+    letterSpacing: -0.8,
   },
-  body: { color: colors.textLight, fontSize: 17, lineHeight: 27, opacity: 0.85 },
+  body: { color: colors.textLight, fontSize: 16, lineHeight: 26, opacity: 0.85, letterSpacing: -0.1 },
   step: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   stepNum: {
     width: 34,
@@ -81,6 +82,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepNumText: { color: '#06240F', fontWeight: '900', fontSize: 15 },
-  stepText: { flex: 1, color: colors.textLight, fontSize: 16, lineHeight: 24 },
+  stepNumText: { color: '#06240F', fontWeight: '700', fontSize: 15, fontFamily: font.numeric },
+  stepText: { flex: 1, color: colors.textLight, fontSize: 15.5, lineHeight: 24, letterSpacing: -0.1 },
 });

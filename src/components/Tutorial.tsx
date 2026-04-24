@@ -140,10 +140,11 @@ const styles = StyleSheet.create({
   dotActive: { backgroundColor: colors.green, width: 30 },
   stepNum: {
     color: colors.green,
-    fontSize: 12,
-    letterSpacing: 2,
-    fontWeight: '800',
+    fontSize: 11,
+    letterSpacing: 2.4,
+    fontWeight: '700',
     marginBottom: 10,
+    fontFamily: font.numeric,
   },
   title: {
     color: colors.textLight,
@@ -153,12 +154,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 32,
     marginBottom: 14,
+    letterSpacing: -0.5,
   },
   body: {
     color: colors.textLight,
-    fontSize: 18,
-    lineHeight: 28,
+    fontSize: 16.5,
+    lineHeight: 26,
     opacity: 0.85,
+    letterSpacing: -0.1,
   },
   actions: {
     marginTop: 26,
@@ -170,9 +173,10 @@ const styles = StyleSheet.create({
   skipBtn: { paddingVertical: 14, paddingHorizontal: 8 },
   skipText: {
     color: colors.textMuted,
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     textDecorationLine: 'underline',
+    letterSpacing: -0.1,
   },
   nextBtn: {
     flex: 1,
@@ -186,9 +190,10 @@ const styles = StyleSheet.create({
   },
   nextText: {
     color: '#06240F',
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    fontFamily: font.numeric,
   },
   arrowUp: {
     position: 'absolute',

@@ -89,14 +89,15 @@ export default function CheckInScreen() {
 
 const styles = StyleSheet.create({
   backBtn: { paddingVertical: 6 },
-  back: { color: colors.textMuted, fontSize: 16, fontWeight: '700' },
+  back: { color: colors.textMuted, fontSize: 15, fontWeight: '600', fontFamily: font.numeric, letterSpacing: -0.1 },
   title: {
     color: colors.textLight,
-    fontSize: 32,
+    fontSize: 34,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 38,
-    marginTop: 8,
+    lineHeight: 40,
+    marginTop: 10,
+    letterSpacing: -0.7,
   },
   title2: {
     color: colors.textLight,
@@ -105,9 +106,10 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     lineHeight: 34,
     marginTop: 8,
+    letterSpacing: -0.6,
   },
-  caption: { color: colors.textMuted, fontSize: 15, lineHeight: 23, marginTop: 10, fontStyle: 'italic' },
+  caption: { color: colors.textMuted, fontSize: 14.5, lineHeight: 22, marginTop: 10, fontStyle: 'italic', letterSpacing: -0.1 },
   row: { flexDirection: 'row', gap: 8, marginTop: 12 },
   rangeLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6, paddingHorizontal: 4 },
-  rangeLabel: { color: colors.textDim, fontSize: 12, fontWeight: '700' },
+  rangeLabel: { color: colors.textDim, fontSize: 11, fontWeight: '600', letterSpacing: 1, fontFamily: font.numeric },
 });

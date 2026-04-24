@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle, ActivityIndicator, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, radius, shadow, gradients } from '../theme/tokens';
+import { colors, radius, shadow, gradients, font } from '../theme/tokens';
 
 type Variant = 'primary' | 'ghost' | 'outline';
 
@@ -86,9 +86,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 1.8,
+    fontWeight: '600',
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
+    fontFamily: font.numeric,
   },
-  icon: { fontSize: 14, fontWeight: '700' },
+  icon: { fontSize: 14, fontWeight: '700', fontFamily: font.numeric },
 });

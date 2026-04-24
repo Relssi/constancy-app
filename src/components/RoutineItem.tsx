@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, View, Text, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, radius } from '../theme/tokens';
+import { colors, radius, font } from '../theme/tokens';
 
 type Props = {
   label: string;
@@ -85,13 +85,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   tick: { color: '#06240F', fontWeight: '900', fontSize: 14 },
-  label: { color: colors.textLight, fontSize: 15, fontWeight: '700' },
-  detail: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+  label: { color: colors.textLight, fontSize: 15.5, fontWeight: '600', letterSpacing: -0.2 },
+  detail: { color: colors.textMuted, fontSize: 12.5, marginTop: 3, letterSpacing: -0.1 },
   timeBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
     borderRadius: 8,
     backgroundColor: 'rgba(255,255,255,0.04)',
   },
-  time: { color: colors.textDim, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
+  time: {
+    color: colors.textDim,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    fontFamily: font.numeric,
+  },
 });

@@ -34,23 +34,25 @@ export default function Content() {
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.textMuted, fontSize: 16, fontWeight: '700' },
+  back: { color: colors.textMuted, fontSize: 15, fontWeight: '600', fontFamily: font.numeric, letterSpacing: -0.1 },
   title: {
     color: colors.textLight,
-    fontSize: 36,
+    fontSize: 40,
     fontFamily: font.serif,
     fontStyle: 'italic',
-    lineHeight: 42,
-    marginTop: 8,
+    lineHeight: 46,
+    marginTop: 12,
+    letterSpacing: -0.9,
   },
-  sub: { color: colors.textMuted, fontSize: 15, marginTop: 10, lineHeight: 24 },
-  tag: { color: colors.green, fontSize: 11, letterSpacing: 2, fontWeight: '800', marginBottom: 10 },
+  sub: { color: colors.textMuted, fontSize: 15, marginTop: 10, lineHeight: 23, letterSpacing: -0.1 },
+  tag: { color: colors.green, fontSize: 11, letterSpacing: 2.4, fontWeight: '700', marginBottom: 10, fontFamily: font.numeric },
   titleItem: {
     color: colors.textLight,
     fontSize: 22,
     fontFamily: font.serif,
     fontStyle: 'italic',
     lineHeight: 30,
+    letterSpacing: -0.4,
   },
-  bodyItem: { color: colors.textLight, fontSize: 16, lineHeight: 25, marginTop: 10, opacity: 0.85 },
+  bodyItem: { color: colors.textLight, fontSize: 15.5, lineHeight: 24, marginTop: 10, opacity: 0.85, letterSpacing: -0.1 },
 });

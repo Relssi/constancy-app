@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
-import { colors, radius } from '../theme/tokens';
+import { colors, radius, font } from '../theme/tokens';
 
 type Props = TextInputProps & {
   label: string;
@@ -24,8 +24,14 @@ export function TextField({ label, hint, error, style, ...rest }: Props) {
 }
 
 const styles = StyleSheet.create({
-  label: { color: colors.textLight, fontSize: 16, fontWeight: '700' },
-  hint: { color: colors.textMuted, fontSize: 14, lineHeight: 20, fontStyle: 'italic' },
+  label: { color: colors.textLight, fontSize: 15.5, fontWeight: '600', letterSpacing: -0.2 },
+  hint: {
+    color: colors.textMuted,
+    fontSize: 13.5,
+    lineHeight: 20,
+    fontStyle: 'italic',
+    letterSpacing: -0.1,
+  },
   input: {
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
@@ -33,10 +39,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingHorizontal: 18,
     paddingVertical: 18,
-    fontSize: 18,
+    fontSize: 17,
     color: colors.textLight,
     minHeight: 58,
+    fontFamily: font.sans,
+    letterSpacing: -0.2,
   },
   inputError: { borderColor: colors.danger },
-  error: { color: colors.danger, fontSize: 14, fontWeight: '700' },
+  error: { color: colors.danger, fontSize: 13.5, fontWeight: '600', letterSpacing: -0.1 },
 });

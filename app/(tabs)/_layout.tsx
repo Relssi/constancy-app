@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors } from '../../src/theme/tokens';
+import { colors, font } from '../../src/theme/tokens';
 
 function Icon({ glyph, focused }: { glyph: string; focused: boolean }) {
   return (
@@ -66,7 +66,13 @@ export default function TabsLayout() {
         tabBarBackground: () => <TabBarBackground />,
         tabBarActiveTintColor: colors.green,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5, marginTop: 4 },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+          letterSpacing: 0.2,
+          marginTop: 4,
+          fontFamily: font.numeric,
+        },
       }}
     >
       <Tabs.Screen

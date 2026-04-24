@@ -69,11 +69,11 @@ export default function Intervention() {
 }
 
 const styles = StyleSheet.create({
-  back: { color: colors.textMuted, fontSize: 16, fontWeight: '700' },
+  back: { color: colors.textMuted, fontSize: 15, fontWeight: '600', fontFamily: font.numeric, letterSpacing: -0.1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
-  eyebrow: { color: colors.green, fontSize: 12, letterSpacing: 3, fontWeight: '800' },
-  headline: { color: colors.textLight, fontSize: 32, fontFamily: font.serif, fontStyle: 'italic' },
-  sub: { color: colors.green, fontSize: 32, fontFamily: font.serif, fontStyle: 'italic' },
+  eyebrow: { color: colors.green, fontSize: 11, letterSpacing: 2.4, fontWeight: '700', fontFamily: font.numeric },
+  headline: { color: colors.textLight, fontSize: 34, fontFamily: font.serif, fontStyle: 'italic', letterSpacing: -0.7 },
+  sub: { color: colors.green, fontSize: 34, fontFamily: font.serif, fontStyle: 'italic', letterSpacing: -0.7 },
   orb: {
     width: 200,
     height: 200,
@@ -86,8 +86,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 40,
   },
-  phase: { color: colors.textLight, fontSize: 24, fontWeight: '700', marginTop: 14 },
-  cycle: { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
+  phase: { color: colors.textLight, fontSize: 22, fontWeight: '600', marginTop: 14, letterSpacing: -0.3 },
+  cycle: { color: colors.textMuted, fontSize: 13, fontWeight: '600', fontFamily: font.numeric, letterSpacing: 0.2 },
   helper: {
     color: colors.textMuted,
     fontSize: 14,
@@ -95,5 +95,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontStyle: 'italic',
     paddingHorizontal: 20,
+    lineHeight: 21,
+    letterSpacing: -0.1,
   },
 });

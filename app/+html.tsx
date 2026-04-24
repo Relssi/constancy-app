@@ -20,7 +20,7 @@ export default function Root({ children }: PropsWithChildren) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,500;0,600;0,700;0,800&family=Inter:wght@400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600;1,9..144,700&family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
 
@@ -36,8 +36,10 @@ const globalCss = `
 html, body, #root { height: 100%; background: #0B2545; }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   background: radial-gradient(1200px 600px at 80% -10%, rgba(34,197,94,0.10), transparent 60%),
               radial-gradient(800px 500px at -10% 30%, rgba(19,49,92,0.8), transparent 60%),
               #0B2545;
