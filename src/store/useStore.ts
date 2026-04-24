@@ -23,6 +23,14 @@ export type RoutineItem = {
   time: string;
 };
 
+export type Meal = {
+  id: string;
+  name: string;
+  time: string;
+  calories?: number;
+  notes?: string;
+};
+
 export type Profile = {
   onboarded: boolean;
   tutorialSeen: boolean;
@@ -43,11 +51,13 @@ type UserBucket = {
   constancyLog: ConstancyLog[];
   routineDone: Record<string, string[]>;
   failedToday: boolean;
+  routine: RoutineItem[];
+  meals: Meal[];
 };
 
 export const DEFAULT_ROUTINE: RoutineItem[] = [
-  { id: 'capsule', label: 'Tomar cápsulas', detail: '2 cápsulas com água', time: '07:23' },
-  { id: 'breakfast', label: 'Café da manhã', detail: 'Seguiu o plano', time: '08:10' },
+  { id: 'capsule', label: 'Tomar cápsulas', detail: '2 cápsulas com água', time: '07:00' },
+  { id: 'breakfast', label: 'Café da manhã', detail: 'Seguir o plano', time: '08:00' },
   { id: 'lunch', label: 'Almoço', detail: 'Confirmar ao comer', time: '12:00' },
   { id: 'dinner', label: 'Jantar', detail: 'Confirmar ao comer', time: '19:00' },
 ];
@@ -59,6 +69,8 @@ const DEFAULT_PROFILE: Profile = {
   bottleStartedAt: Date.now(),
 };
 
+const uid = () => Math.random().toString(36).slice(2, 10);
+
 type State = {
   auth: Auth;
   accounts: Record<string, UserBucket>;
@@ -67,6 +79,8 @@ type State = {
   constancyLog: ConstancyLog[];
   routineDone: Record<string, string[]>;
   failedToday: boolean;
+  routine: RoutineItem[];
+  meals: Meal[];
   signUp: (email: string, name: string, password: string) => { ok: boolean; error?: string };
   signIn: (email: string, password: string) => { ok: boolean; error?: string };
   signOut: () => void;
@@ -76,6 +90,13 @@ type State = {
   addCheckIn: (c: Omit<CheckIn, 'id' | 'ts'>) => void;
   logConstancy: (taken: boolean) => void;
   toggleRoutine: (id: string) => void;
+  addRoutineItem: (r: Omit<RoutineItem, 'id'>) => void;
+  updateRoutineItem: (id: string, r: Partial<Omit<RoutineItem, 'id'>>) => void;
+  removeRoutineItem: (id: string) => void;
+  moveRoutineItem: (id: string, direction: 'up' | 'down') => void;
+  addMeal: (m: Omit<Meal, 'id'>) => void;
+  updateMeal: (id: string, m: Partial<Omit<Meal, 'id'>>) => void;
+  removeMeal: (id: string) => void;
   markFail: () => void;
   clearFail: () => void;
   reset: () => void;
@@ -96,6 +117,19 @@ function hashPw(pw: string): string {
 
 const normEmail = (e: string) => e.trim().toLowerCase();
 
+function freshBucket(name: string, password: string): UserBucket {
+  return {
+    passwordHash: hashPw(password),
+    profile: { ...DEFAULT_PROFILE, name, bottleStartedAt: Date.now() },
+    checkIns: [],
+    constancyLog: [],
+    routineDone: {},
+    failedToday: false,
+    routine: DEFAULT_ROUTINE.map((r) => ({ ...r })),
+    meals: [],
+  };
+}
+
 export const useStore = create<State>()(
   persist(
     (set, get) => ({
@@ -106,6 +140,8 @@ export const useStore = create<State>()(
       constancyLog: [],
       routineDone: {},
       failedToday: false,
+      routine: DEFAULT_ROUTINE.map((r) => ({ ...r })),
+      meals: [],
 
       signUp: (emailRaw, nameRaw, password) => {
         const email = normEmail(emailRaw);
@@ -117,22 +153,17 @@ export const useStore = create<State>()(
         if (!name) return { ok: false, error: 'Digite seu nome.' };
         const s = get();
         if (s.accounts[email]) return { ok: false, error: 'Esse e-mail já tem conta. Entre com a senha.' };
-        const bucket: UserBucket = {
-          passwordHash: hashPw(password),
-          profile: { ...DEFAULT_PROFILE, name, bottleStartedAt: Date.now() },
-          checkIns: [],
-          constancyLog: [],
-          routineDone: {},
-          failedToday: false,
-        };
+        const bucket = freshBucket(name, password);
         set({
           accounts: { ...s.accounts, [email]: bucket },
           auth: { email, name },
           profile: bucket.profile,
-          checkIns: [],
-          constancyLog: [],
-          routineDone: {},
-          failedToday: false,
+          checkIns: bucket.checkIns,
+          constancyLog: bucket.constancyLog,
+          routineDone: bucket.routineDone,
+          failedToday: bucket.failedToday,
+          routine: bucket.routine,
+          meals: bucket.meals,
         });
         return { ok: true };
       },
@@ -151,6 +182,8 @@ export const useStore = create<State>()(
           constancyLog: acc.constancyLog,
           routineDone: acc.routineDone,
           failedToday: acc.failedToday,
+          routine: acc.routine?.length ? acc.routine : DEFAULT_ROUTINE.map((r) => ({ ...r })),
+          meals: acc.meals ?? [],
         });
         return { ok: true };
       },
@@ -166,6 +199,8 @@ export const useStore = create<State>()(
             constancyLog: s.constancyLog,
             routineDone: s.routineDone,
             failedToday: s.failedToday,
+            routine: s.routine,
+            meals: s.meals,
           };
           set({
             accounts: { ...s.accounts, [email]: bucket },
@@ -175,6 +210,8 @@ export const useStore = create<State>()(
             constancyLog: [],
             routineDone: {},
             failedToday: false,
+            routine: DEFAULT_ROUTINE.map((r) => ({ ...r })),
+            meals: [],
           });
         }
       },
@@ -186,7 +223,7 @@ export const useStore = create<State>()(
         set((s) => ({
           checkIns: [
             ...s.checkIns,
-            { ...c, id: Math.random().toString(36).slice(2), ts: Date.now() },
+            { ...c, id: uid(), ts: Date.now() },
           ],
         })),
       logConstancy: (taken) =>
@@ -198,6 +235,26 @@ export const useStore = create<State>()(
           const next = list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
           return { routineDone: { ...s.routineDone, [key]: next } };
         }),
+      addRoutineItem: (r) =>
+        set((s) => ({ routine: [...s.routine, { ...r, id: uid() }] })),
+      updateRoutineItem: (id, r) =>
+        set((s) => ({ routine: s.routine.map((x) => (x.id === id ? { ...x, ...r } : x)) })),
+      removeRoutineItem: (id) =>
+        set((s) => ({ routine: s.routine.filter((x) => x.id !== id) })),
+      moveRoutineItem: (id, direction) =>
+        set((s) => {
+          const idx = s.routine.findIndex((x) => x.id === id);
+          if (idx < 0) return {};
+          const swap = direction === 'up' ? idx - 1 : idx + 1;
+          if (swap < 0 || swap >= s.routine.length) return {};
+          const next = [...s.routine];
+          [next[idx], next[swap]] = [next[swap], next[idx]];
+          return { routine: next };
+        }),
+      addMeal: (m) => set((s) => ({ meals: [...s.meals, { ...m, id: uid() }] })),
+      updateMeal: (id, m) =>
+        set((s) => ({ meals: s.meals.map((x) => (x.id === id ? { ...x, ...m } : x)) })),
+      removeMeal: (id) => set((s) => ({ meals: s.meals.filter((x) => x.id !== id) })),
       markFail: () => set({ failedToday: true }),
       clearFail: () => set({ failedToday: false }),
       reset: () =>
@@ -207,11 +264,29 @@ export const useStore = create<State>()(
           constancyLog: [],
           routineDone: {},
           failedToday: false,
+          routine: DEFAULT_ROUTINE.map((r) => ({ ...r })),
+          meals: [],
         }),
     }),
     {
       name: 'constancy-store',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 2,
+      migrate: (persisted: any, version) => {
+        if (!persisted) return persisted;
+        if (version < 2) {
+          persisted.routine = persisted.routine?.length ? persisted.routine : DEFAULT_ROUTINE.map((r) => ({ ...r }));
+          persisted.meals = persisted.meals ?? [];
+          if (persisted.accounts) {
+            for (const email of Object.keys(persisted.accounts)) {
+              const acc = persisted.accounts[email];
+              if (!acc.routine?.length) acc.routine = DEFAULT_ROUTINE.map((r) => ({ ...r }));
+              if (!acc.meals) acc.meals = [];
+            }
+          }
+        }
+        return persisted;
+      },
     }
   )
 );

@@ -66,12 +66,16 @@ export default function TabsLayout() {
         tabBarBackground: () => <TabBarBackground />,
         tabBarActiveTintColor: colors.green,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '800', letterSpacing: 1, marginTop: 4 },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5, marginTop: 4 },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{ title: 'Início', tabBarIcon: ({ focused }) => <Icon glyph="⌂" focused={focused} /> }}
+      />
+      <Tabs.Screen
+        name="meals"
+        options={{ title: 'Comida', tabBarIcon: ({ focused }) => <Icon glyph="✱" focused={focused} /> }}
       />
       <Tabs.Screen
         name="progress"
@@ -91,9 +95,9 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   iconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,

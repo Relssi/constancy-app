@@ -6,21 +6,37 @@ import { Card } from '../../src/components/Card';
 import { Eyebrow } from '../../src/components/Eyebrow';
 import { RoutineItem } from '../../src/components/RoutineItem';
 import { Tutorial } from '../../src/components/Tutorial';
-import { useStore, DEFAULT_ROUTINE } from '../../src/store/useStore';
-import { currentStreak, bestStreak } from '../../src/lib/streak';
-import { nextIntervention } from '../../src/lib/personalization';
+import { useStore } from '../../src/store/useStore';
+import { currentStreak, bestStreak, monthRate } from '../../src/lib/streak';
+import { nextIntervention, constancyAdherence, daysActive } from '../../src/lib/personalization';
 import { colors, font } from '../../src/theme/tokens';
 
 export default function Home() {
   const router = useRouter();
-  const { profile, checkIns, constancyLog, routineDone, toggleRoutine, failedToday, finishTutorial } =
-    useStore();
+  const {
+    profile,
+    checkIns,
+    constancyLog,
+    routineDone,
+    toggleRoutine,
+    failedToday,
+    finishTutorial,
+    routine,
+    meals,
+  } = useStore();
   const streak = currentStreak(constancyLog);
   const best = bestStreak(constancyLog);
+  const rate = monthRate(constancyLog);
+  const adherence = constancyAdherence(constancyLog, 7);
+  const answered = daysActive(checkIns, 7);
   const key = new Date().toDateString();
   const done = routineDone[key] ?? [];
   const intervention = nextIntervention(profile, checkIns);
   const showTutorial = profile.onboarded && !profile.tutorialSeen;
+
+  const sortedMeals = [...meals].sort((a, b) => a.time.localeCompare(b.time));
+  const displayMeals = sortedMeals.slice(0, 3);
+  const totalCals = sortedMeals.reduce((s, m) => s + (m.calories ?? 0), 0);
 
   return (
     <Screen>
@@ -37,7 +53,8 @@ export default function Home() {
       <View style={{ gap: 6, marginTop: 2 }}>
         <Text style={styles.greetEyebrow}>{greet()}</Text>
         <Text style={styles.name}>
-          {profile.name ?? 'Oi, tudo bem?'} <Text style={{ color: colors.green, fontSize: 24 }}>✦</Text>
+          {profile.name ?? 'Oi, tudo bem?'}{' '}
+          <Text style={{ color: colors.green, fontSize: 24 }}>✦</Text>
         </Text>
       </View>
 
@@ -45,39 +62,59 @@ export default function Home() {
         <Card variant="accent">
           <Eyebrow text="Recomeçar" />
           <Text style={styles.resetTitle}>Novo começo daqui.</Text>
-          <Text style={styles.muted}>
-            Próxima refeição é o ponto de partida. Só isso.
-          </Text>
+          <Text style={styles.muted}>Próxima refeição é o ponto de partida. Só isso.</Text>
           <Pressable onPress={() => useStore.getState().clearFail()} style={styles.okBtn}>
             <Text style={styles.okText}>Entendi, pode continuar</Text>
           </Pressable>
         </Card>
       )}
 
-      <Card variant="hero" padding={26} style={{ minHeight: 210 }}>
-        <View style={styles.heroOrb} />
-        <View style={styles.heroOrbSmall} />
-        <Eyebrow text="Dias Seguidos" />
-        <View style={styles.streakRow}>
-          <Text style={styles.streakBig}>{streak}</Text>
-          <View style={{ marginBottom: 14, marginLeft: 10 }}>
-            <Text style={styles.streakUnit}>{streak === 1 ? 'dia' : 'dias'}</Text>
-            <Text style={styles.streakSub}>tomando a cápsula</Text>
+      <Pressable onPress={() => router.push('/progress')}>
+        <Card variant="hero" padding={26} style={{ minHeight: 230 }}>
+          <View style={styles.heroOrb} />
+          <View style={styles.heroOrbSmall} />
+          <View style={styles.heroHead}>
+            <Eyebrow text="Dias Seguidos" />
+            <View style={styles.tapHint}>
+              <Text style={styles.tapHintText}>ver progresso completo ›</Text>
+            </View>
           </View>
-        </View>
-        <View style={styles.progressBar}>
-          <LinearGradient
-            colors={['#22C55E', '#34E671'] as const}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[styles.progressFill, { width: `${Math.min(100, (streak / Math.max(7, best)) * 100)}%` }]}
-          />
-        </View>
-        <Text style={styles.heroFoot}>
-          Seu melhor foi <Text style={styles.heroFootStrong}>{best} {best === 1 ? 'dia' : 'dias'}</Text>
-          {best > streak && best > 0 ? `  ·  ${best - streak} pra bater o recorde` : '  ·  continue assim'}
-        </Text>
-      </Card>
+          <View style={styles.streakRow}>
+            <Text style={styles.streakBig}>{streak}</Text>
+            <View style={{ marginBottom: 14, marginLeft: 10 }}>
+              <Text style={styles.streakUnit}>{streak === 1 ? 'dia' : 'dias'}</Text>
+              <Text style={styles.streakSub}>tomando a cápsula</Text>
+            </View>
+          </View>
+
+          <View style={styles.progressBar}>
+            <LinearGradient
+              colors={['#22C55E', '#34E671'] as const}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[
+                styles.progressFill,
+                { width: `${Math.min(100, (streak / Math.max(7, best)) * 100)}%` },
+              ]}
+            />
+          </View>
+
+          <View style={styles.miniStatsRow}>
+            <MiniStat value={`${best}`} unit={best === 1 ? 'dia' : 'dias'} label="seu recorde" />
+            <View style={styles.miniDivider} />
+            <MiniStat value={`${adherence}%`} unit="" label="cápsulas na semana" />
+            <View style={styles.miniDivider} />
+            <MiniStat value={`${answered}`} unit={answered === 1 ? 'dia' : 'dias'} label="respondeu essa semana" />
+          </View>
+
+          <Text style={styles.heroFoot}>
+            No mês você está em <Text style={styles.heroFootStrong}>{rate}%</Text> dos dias
+            {best > streak && best > 0
+              ? `  ·  ${best - streak} ${best - streak === 1 ? 'dia' : 'dias'} pra bater o recorde`
+              : '  ·  continue assim'}
+          </Text>
+        </Card>
+      </Pressable>
 
       <Pressable onPress={() => router.push('/intervention')}>
         <Card>
@@ -104,13 +141,13 @@ export default function Home() {
           <Eyebrow text="Minha Rotina de Hoje" />
           <View style={styles.countBadge}>
             <Text style={styles.sectionCount}>
-              {done.length} de {DEFAULT_ROUTINE.length}
+              {done.length} de {routine.length}
             </Text>
           </View>
         </View>
         <Text style={styles.sectionHint}>Toque na bolinha quando terminar cada etapa.</Text>
         <View style={{ gap: 10, marginTop: 12 }}>
-          {DEFAULT_ROUTINE.map((r) => (
+          {routine.map((r) => (
             <RoutineItem
               key={r.id}
               label={r.label}
@@ -121,6 +158,49 @@ export default function Home() {
             />
           ))}
         </View>
+        <Pressable onPress={() => router.push('/routine')} style={styles.manageBtn}>
+          <Text style={styles.manageBtnText}>✎ Organizar minha rotina</Text>
+        </Pressable>
+      </View>
+
+      <View>
+        <View style={styles.sectionHead}>
+          <Eyebrow text="Minhas Refeições" />
+          {totalCals > 0 && (
+            <View style={styles.countBadge}>
+              <Text style={styles.sectionCount}>{totalCals} kcal</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.sectionHint}>
+          {sortedMeals.length === 0
+            ? 'Você ainda não anotou suas refeições de hoje.'
+            : 'O que você planejou pra comer hoje, em ordem.'}
+        </Text>
+        <View style={{ gap: 10, marginTop: 12 }}>
+          {displayMeals.map((m) => (
+            <Card key={m.id} padding={14}>
+              <View style={styles.mealRow}>
+                <View style={styles.mealTime}>
+                  <Text style={styles.mealTimeTxt}>{m.time}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.mealName}>{m.name}</Text>
+                  {m.calories ? <Text style={styles.mealCal}>{m.calories} kcal</Text> : null}
+                </View>
+              </View>
+            </Card>
+          ))}
+        </View>
+        <Pressable onPress={() => router.push('/meals')} style={styles.manageBtn}>
+          <Text style={styles.manageBtnText}>
+            {sortedMeals.length === 0
+              ? '+ Adicionar minhas refeições'
+              : sortedMeals.length > displayMeals.length
+              ? `Ver todas (${sortedMeals.length}) ›`
+              : '✎ Organizar refeições'}
+          </Text>
+        </Pressable>
       </View>
 
       <Card variant="accent" padding={22}>
@@ -147,6 +227,18 @@ export default function Home() {
         <Text style={styles.footerLink}>Ver dicas pra você ›</Text>
       </Pressable>
     </Screen>
+  );
+}
+
+function MiniStat({ value, unit, label }: { value: string; unit: string; label: string }) {
+  return (
+    <View style={styles.miniStat}>
+      <Text style={styles.miniVal}>
+        {value}
+        {unit ? <Text style={styles.miniUnit}> {unit}</Text> : null}
+      </Text>
+      <Text style={styles.miniLabel}>{label}</Text>
+    </View>
   );
 }
 
@@ -178,6 +270,20 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: -0.5,
   },
+  heroHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  tapHint: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: 'rgba(34,197,94,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(34,197,94,0.3)',
+  },
+  tapHintText: { color: colors.green, fontSize: 10, fontWeight: '800', letterSpacing: 1 },
   heroOrb: {
     position: 'absolute',
     right: -60,
@@ -213,11 +319,22 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: 'rgba(255,255,255,0.08)',
-    marginTop: 20,
+    marginTop: 18,
     overflow: 'hidden',
   },
   progressFill: { height: '100%', borderRadius: 4 },
-  heroFoot: { color: colors.textMuted, fontSize: 14, marginTop: 12 },
+  miniStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    marginTop: 18,
+    gap: 0,
+  },
+  miniStat: { flex: 1, alignItems: 'flex-start' },
+  miniVal: { color: colors.textLight, fontSize: 22, fontWeight: '900', letterSpacing: -0.5 },
+  miniUnit: { color: colors.textMuted, fontSize: 12, fontWeight: '700' },
+  miniLabel: { color: colors.textMuted, fontSize: 11, fontWeight: '700', marginTop: 4, lineHeight: 14 },
+  miniDivider: { width: 1, backgroundColor: colors.navyBorder, marginHorizontal: 8 },
+  heroFoot: { color: colors.textMuted, fontSize: 13, marginTop: 16 },
   heroFootStrong: { color: colors.green, fontWeight: '800' },
   muted: { color: colors.textMuted, fontSize: 16, lineHeight: 24, marginTop: 8 },
   intTitle: { color: colors.textLight, fontSize: 20, fontWeight: '700', marginTop: 6 },
@@ -264,6 +381,30 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(34,197,94,0.3)',
   },
   sectionCount: { color: colors.green, fontSize: 13, fontWeight: '800' },
+  manageBtn: {
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 999,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: colors.navyBorder,
+  },
+  manageBtnText: { color: colors.textLight, fontSize: 14, fontWeight: '800', letterSpacing: 0.5 },
+  mealRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  mealTime: {
+    minWidth: 60,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: 'rgba(34,197,94,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(34,197,94,0.3)',
+    alignItems: 'center',
+  },
+  mealTimeTxt: { color: colors.green, fontSize: 13, fontWeight: '900', letterSpacing: 0.5 },
+  mealName: { color: colors.textLight, fontSize: 16, fontWeight: '700' },
+  mealCal: { color: colors.textMuted, fontSize: 12, fontWeight: '700', marginTop: 3 },
   quoteSerif: {
     color: colors.textLight,
     fontFamily: font.serif,
