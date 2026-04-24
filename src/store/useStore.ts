@@ -25,6 +25,11 @@ export type RoutineItem = {
   time: string;
 };
 
+export type MealItem = {
+  foodId: number;
+  grams: number;
+};
+
 export type Meal = {
   id: string;
   name: string;
@@ -32,6 +37,8 @@ export type Meal = {
   calories?: number;
   notes?: string;
   recurring?: boolean;
+  /** Itens do banco nutricional. Se preenchido, calorias são derivadas. */
+  items?: MealItem[];
 };
 
 export type WeightEntry = { ts: number; kg: number };

@@ -1,4 +1,16 @@
 import { Profile, Activity, Sex, WeightEntry, ExtraEntry, Meal } from '../store/useStore';
+import { getFood, kcalFor } from './foods';
+
+/** kcal de uma refeição: se tem items, soma do banco; senão usa o campo calories. */
+export function mealKcal(m: Meal): number {
+  if (m.items && m.items.length) {
+    return m.items.reduce((s, it) => {
+      const f = getFood(it.foodId);
+      return f ? s + kcalFor(f, it.grams) : s;
+    }, 0);
+  }
+  return m.calories ?? 0;
+}
 
 // Mifflin-St Jeor
 export function bmr(sex: Sex, weightKg: number, heightCm: number, age: number): number {
@@ -55,13 +67,13 @@ export function caloriesToday(
 ): number {
   const key = dayKey(Date.now());
   const doneIds = new Set(mealDone[key] ?? []);
-  const mealKcal = meals
+  const mealsKcal = meals
     .filter((m) => doneIds.has(m.id))
-    .reduce((s, m) => s + (m.calories ?? 0), 0);
+    .reduce((s, m) => s + mealKcal(m), 0);
   const extrasKcal = extras
     .filter((e) => dayKey(e.ts) === key)
     .reduce((s, e) => s + e.calories, 0);
-  return mealKcal + extrasKcal;
+  return mealsKcal + extrasKcal;
 }
 
 /** Peso atual − peso há 7 dias (aproximado pelo registro mais próximo do dia 7). */
@@ -102,7 +114,7 @@ export function weeklyAvgCalories(
     const kcal = ids
       .map((id) => meals.find((m) => m.id === id))
       .filter(Boolean)
-      .reduce((s, m) => s + (m!.calories ?? 0), 0);
+      .reduce((s, m) => s + mealKcal(m!), 0);
     totals[key] = (totals[key] ?? 0) + kcal;
   }
   for (const e of extras) {
