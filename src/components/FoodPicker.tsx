@@ -1,5 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Modal, ScrollView, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { searchFoods, Food, kcalFor } from '../lib/foods';
 import { Button } from './Button';
 import { colors, font, radius } from '../theme/tokens';
@@ -40,10 +49,16 @@ export function FoodPicker({ visible, onCancel, onPick, initialQuery = '' }: Pro
   const gramsNum = Math.max(0, parseInt(grams, 10) || 0);
   const computed = picked ? kcalFor(picked, gramsNum) : 0;
 
+  if (!visible) return null;
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleCancel}>
-      <View style={styles.bg}>
-        <View style={styles.card}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.bg}
+      pointerEvents="auto"
+    >
+      <Pressable style={StyleSheet.absoluteFill} onPress={handleCancel} />
+      <View style={styles.card} pointerEvents="box-none">
           <Text style={styles.eyebrow}>BANCO DE ALIMENTOS</Text>
           <Text style={styles.title}>
             {picked ? 'Quanto\ncomeu?' : 'Procurar\nalimento.'}
@@ -139,29 +154,33 @@ export function FoodPicker({ visible, onCancel, onPick, initialQuery = '' }: Pro
               </View>
             </>
           )}
-        </View>
       </View>
-    </Modal>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   bg: {
-    flex: 1,
-    backgroundColor: 'rgba(5,14,31,0.88)',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(5,14,31,0.94)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 22,
+    padding: 18,
+    zIndex: 999,
   },
   card: {
     width: '100%',
     maxWidth: 560,
-    maxHeight: '92%',
+    flex: 1,
     backgroundColor: colors.navy,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.navyBorderHi,
-    padding: 22,
+    padding: 20,
   },
   eyebrow: {
     color: colors.textDim,
@@ -223,8 +242,8 @@ const styles = StyleSheet.create({
     letterSpacing: -0.1,
   },
   list: {
+    flex: 1,
     marginTop: 10,
-    maxHeight: 360,
   },
   row: {
     flexDirection: 'row',
