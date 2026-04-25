@@ -7,15 +7,18 @@ type Props = { data: { label: string; value: number }[] };
 export function Bars({ data }: Props) {
   return (
     <View style={{ gap: 10 }}>
-      {data.map((d, i) => (
-        <View key={i} style={styles.row}>
-          <Text style={styles.label}>{d.label}</Text>
-          <View style={styles.track}>
-            <View style={[styles.fill, { width: `${d.value}%` }]} />
+      {data.map((d) => {
+        const v = Math.max(0, Math.min(100, d.value));
+        return (
+          <View key={d.label} style={styles.row}>
+            <Text style={styles.label}>{d.label}</Text>
+            <View style={styles.track}>
+              <View style={[styles.fill, { width: `${v}%` }]} />
+            </View>
+            <Text style={styles.val}>{v}</Text>
           </View>
-          <Text style={styles.val}>{d.value}</Text>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 }

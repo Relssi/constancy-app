@@ -31,14 +31,17 @@ export function WeightChart({ data, targetKg }: Props) {
   const H = 140;
 
   const targetTop = targetKg ? H - ((targetKg - min) / span) * H : null;
+  const clampedTargetTop = targetTop !== null
+    ? Math.max(0, Math.min(H, targetTop))
+    : null;
 
   return (
-    <View>
-      <View style={{ height: H, position: 'relative', marginTop: 6, paddingHorizontal: 4 }}>
-        {targetTop !== null && targetTop >= 0 && targetTop <= H && (
+    <View style={{ overflow: 'visible' }}>
+      <View style={{ height: H, position: 'relative', marginTop: 18, paddingHorizontal: 4, overflow: 'visible' }}>
+        {clampedTargetTop !== null && (
           <>
-            <View style={[styles.targetLine, { top: targetTop }]} />
-            <Text style={[styles.targetLabel, { top: targetTop - 16 }]}>meta {targetKg}kg</Text>
+            <View style={[styles.targetLine, { top: clampedTargetTop }]} />
+            <Text style={[styles.targetLabel, { top: Math.max(0, clampedTargetTop - 14) }]}>meta {targetKg}kg</Text>
           </>
         )}
 
@@ -49,7 +52,7 @@ export function WeightChart({ data, targetKg }: Props) {
             return (
               <View key={e.ts} style={styles.colWrap}>
                 {isLast && (
-                  <Text style={[styles.valueLabel, { bottom: h + 12 }]}>{e.kg}kg</Text>
+                  <Text style={[styles.valueLabel, { bottom: Math.min(H - 14, h + 12) }]}>{e.kg}kg</Text>
                 )}
                 {/* barra vertical suave */}
                 <View
@@ -106,6 +109,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     height: '100%',
     gap: 4,
+    overflow: 'visible',
   },
   colWrap: {
     flex: 1,

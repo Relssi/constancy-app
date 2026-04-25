@@ -28,7 +28,7 @@ export default function SignUp() {
   };
 
   return (
-    <Screen>
+    <Screen kbAvoid>
       <Pressable onPress={() => router.back()} style={{ paddingVertical: 6 }}>
         <Text style={styles.back}>‹ Voltar</Text>
       </Pressable>

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Modal, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { Screen } from '../../src/components/Screen';
 import { Card } from '../../src/components/Card';
@@ -224,30 +224,40 @@ function WeightForm({
   const n = parseFloat(val.replace(',', '.'));
   const valid = !isNaN(n) && n >= 30 && n <= 300;
   return (
-    <View style={styles.modalBg}>
-      <View style={styles.modalCard}>
-        <Eyebrow text="Registrar Peso" />
-        <Text style={styles.modalTitle}>Qual seu{'\n'}peso hoje?</Text>
-        <View style={{ gap: 14, marginTop: 16 }}>
-          <TextField
-            label="Peso em quilos"
-            hint="Pode usar vírgula. Ex: 72,4"
-            value={val}
-            onChangeText={(v) => setVal(v.replace(/[^0-9.,]/g, '').slice(0, 6))}
-            keyboardType="numeric"
-            placeholder="Ex: 72"
-          />
-        </View>
-        <View style={{ flexDirection: 'row', gap: 10, marginTop: 22 }}>
-          <View style={{ flex: 1 }}>
-            <Button label="Cancelar" variant="outline" onPress={onCancel} />
+    <KeyboardAvoidingView
+      style={styles.modalBg}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+      <ScrollView
+        contentContainerStyle={styles.modalScroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.modalCard}>
+          <Eyebrow text="Registrar Peso" />
+          <Text style={styles.modalTitle}>Qual seu{'\n'}peso hoje?</Text>
+          <View style={{ gap: 14, marginTop: 16 }}>
+            <TextField
+              label="Peso em quilos"
+              hint="Pode usar vírgula. Ex: 72,4"
+              value={val}
+              onChangeText={(v) => setVal(v.replace(/[^0-9.,]/g, '').slice(0, 6))}
+              keyboardType="numeric"
+              placeholder="Ex: 72"
+            />
           </View>
-          <View style={{ flex: 1.3 }}>
-            <Button label="Salvar" disabled={!valid} onPress={() => onSave(n)} />
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 22 }}>
+            <View style={{ flex: 1 }}>
+              <Button label="Cancelar" variant="outline" onPress={onCancel} />
+            </View>
+            <View style={{ flex: 1.3 }}>
+              <Button label="Salvar" disabled={!valid} onPress={() => onSave(n)} />
+            </View>
           </View>
         </View>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -266,38 +276,48 @@ function TargetForm({
   const n = parseFloat(val.replace(',', '.'));
   const valid = !isNaN(n) && n >= 30 && n <= 300;
   return (
-    <View style={styles.modalBg}>
-      <View style={styles.modalCard}>
-        <Eyebrow text="Minha Meta" />
-        <Text style={styles.modalTitle}>Qual peso{'\n'}você quer?</Text>
-        <Text style={styles.targetIntro}>
-          Não precisa ser rápido. O importante é saber pra onde ir.
-        </Text>
-        <View style={{ gap: 14, marginTop: 16 }}>
-          <TextField
-            label="Peso que quer alcançar"
-            hint="Em quilos. Pode usar vírgula."
-            value={val}
-            onChangeText={(v) => setVal(v.replace(/[^0-9.,]/g, '').slice(0, 6))}
-            keyboardType="numeric"
-            placeholder="Ex: 65"
-          />
-        </View>
-        <View style={{ flexDirection: 'row', gap: 10, marginTop: 22 }}>
-          <View style={{ flex: 1 }}>
-            <Button label="Cancelar" variant="outline" onPress={onCancel} />
+    <KeyboardAvoidingView
+      style={styles.modalBg}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+      <ScrollView
+        contentContainerStyle={styles.modalScroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.modalCard}>
+          <Eyebrow text="Minha Meta" />
+          <Text style={styles.modalTitle}>Qual peso{'\n'}você quer?</Text>
+          <Text style={styles.targetIntro}>
+            Não precisa ser rápido. O importante é saber pra onde ir.
+          </Text>
+          <View style={{ gap: 14, marginTop: 16 }}>
+            <TextField
+              label="Peso que quer alcançar"
+              hint="Em quilos. Pode usar vírgula."
+              value={val}
+              onChangeText={(v) => setVal(v.replace(/[^0-9.,]/g, '').slice(0, 6))}
+              keyboardType="numeric"
+              placeholder="Ex: 65"
+            />
           </View>
-          <View style={{ flex: 1.3 }}>
-            <Button label="Salvar meta" disabled={!valid} onPress={() => onSave(n)} />
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 22 }}>
+            <View style={{ flex: 1 }}>
+              <Button label="Cancelar" variant="outline" onPress={onCancel} />
+            </View>
+            <View style={{ flex: 1.3 }}>
+              <Button label="Salvar meta" disabled={!valid} onPress={() => onSave(n)} />
+            </View>
           </View>
+          {current && (
+            <Pressable onPress={onClear} style={{ padding: 14, alignItems: 'center', marginTop: 4 }}>
+              <Text style={styles.clearLink}>Tirar a meta</Text>
+            </Pressable>
+          )}
         </View>
-        {current && (
-          <Pressable onPress={onClear} style={{ padding: 14, alignItems: 'center', marginTop: 4 }}>
-            <Text style={styles.clearLink}>Tirar a meta</Text>
-          </Pressable>
-        )}
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -471,9 +491,13 @@ const styles = StyleSheet.create({
   modalBg: {
     flex: 1,
     backgroundColor: 'rgba(5,14,31,0.85)',
+  },
+  modalScroll: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 22,
+    padding: 18,
+    paddingVertical: 40,
   },
   modalCard: {
     width: '100%',

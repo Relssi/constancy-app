@@ -28,7 +28,7 @@ export default function OnboardingBody() {
     !isNaN(weightN) && weightN >= 30 && weightN <= 300;
 
   return (
-    <Screen>
+    <Screen kbAvoid>
       <Text style={styles.step}>PERGUNTA 5 DE 6</Text>
       <Eyebrow text="Seu Corpo" />
       <Text style={styles.title}>Só mais{'\n'}uns dadinhos.</Text>

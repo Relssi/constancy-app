@@ -8,6 +8,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { searchFoods, Food, kcalFor } from '../lib/foods';
 import { Button } from './Button';
@@ -49,16 +50,21 @@ export function FoodPicker({ visible, onCancel, onPick, initialQuery = '' }: Pro
   const gramsNum = Math.max(0, parseInt(grams, 10) || 0);
   const computed = picked ? kcalFor(picked, gramsNum) : 0;
 
-  if (!visible) return null;
-
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.bg}
-      pointerEvents="auto"
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={handleCancel}
+      statusBarTranslucent
+      presentationStyle="overFullScreen"
     >
-      <Pressable style={StyleSheet.absoluteFill} onPress={handleCancel} />
-      <View style={styles.card} pointerEvents="box-none">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.bg}
+      >
+        <Pressable style={StyleSheet.absoluteFill} onPress={handleCancel} />
+        <View style={styles.card}>
           <Text style={styles.eyebrow}>BANCO DE ALIMENTOS</Text>
           <Text style={styles.title}>
             {picked ? 'Quanto\ncomeu?' : 'Procurar\nalimento.'}
@@ -77,7 +83,11 @@ export function FoodPicker({ visible, onCancel, onPick, initialQuery = '' }: Pro
                   autoFocus
                 />
                 {q.length > 0 && (
-                  <Pressable onPress={() => setQ('')} style={styles.searchClear}>
+                  <Pressable
+                    onPress={() => setQ('')}
+                    style={styles.searchClear}
+                    hitSlop={10}
+                  >
                     <Text style={styles.searchClearTxt}>×</Text>
                   </Pressable>
                 )}
@@ -85,7 +95,11 @@ export function FoodPicker({ visible, onCancel, onPick, initialQuery = '' }: Pro
               <Text style={styles.hint}>
                 Valores por 100g. Depois você digita o peso do que comeu.
               </Text>
-              <ScrollView style={styles.list} keyboardShouldPersistTaps="handled">
+              <ScrollView
+                style={styles.list}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 8 }}
+              >
                 {results.length === 0 ? (
                   <Text style={styles.empty}>
                     Não achei esse alimento. Tenta outro nome ou volta e digite manualmente.
@@ -116,7 +130,10 @@ export function FoodPicker({ visible, onCancel, onPick, initialQuery = '' }: Pro
               </View>
             </>
           ) : (
-            <>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 8 }}
+            >
               <View style={styles.pickedCard}>
                 <Text style={styles.pickedName}>{picked.name}</Text>
                 <Text style={styles.pickedBase}>{picked.kcal} kcal por 100g</Text>
@@ -152,30 +169,27 @@ export function FoodPicker({ visible, onCancel, onPick, initialQuery = '' }: Pro
                   />
                 </View>
               </View>
-            </>
+            </ScrollView>
           )}
-      </View>
-    </KeyboardAvoidingView>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   bg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    flex: 1,
     backgroundColor: 'rgba(5,14,31,0.94)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 18,
-    zIndex: 999,
   },
   card: {
     width: '100%',
     maxWidth: 560,
     flex: 1,
+    maxHeight: 720,
     backgroundColor: colors.navy,
     borderRadius: radius.lg,
     borderWidth: 1,
@@ -196,7 +210,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     lineHeight: 34,
     marginTop: 8,
-    letterSpacing: -0.7,
   },
   searchWrap: {
     marginTop: 16,
@@ -218,7 +231,6 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     fontSize: 16,
     paddingVertical: 12,
-    letterSpacing: -0.2,
   },
   searchClear: {
     width: 28,
@@ -239,7 +251,6 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     marginTop: 8,
     fontStyle: 'italic',
-    letterSpacing: -0.1,
   },
   list: {
     flex: 1,
@@ -258,7 +269,6 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     fontSize: 14.5,
     fontWeight: '600',
-    letterSpacing: -0.2,
     lineHeight: 20,
   },
   rowMacros: {
@@ -283,7 +293,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     fontFamily: font.numeric,
-    letterSpacing: -0.3,
   },
   kcalPillUnit: {
     color: colors.green,
@@ -300,7 +309,6 @@ const styles = StyleSheet.create({
     padding: 16,
     textAlign: 'center',
     fontStyle: 'italic',
-    letterSpacing: -0.1,
   },
   pickedCard: {
     marginTop: 16,
@@ -314,7 +322,6 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     fontSize: 16,
     fontWeight: '600',
-    letterSpacing: -0.2,
     lineHeight: 22,
   },
   pickedBase: {
@@ -329,7 +336,6 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     fontSize: 13.5,
     fontWeight: '600',
-    letterSpacing: -0.1,
     marginTop: 16,
   },
   gramsInput: {
@@ -338,7 +344,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '600',
     fontFamily: font.numeric,
-    letterSpacing: -0.6,
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
     borderColor: colors.navyBorder,
@@ -352,7 +357,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 18,
     fontStyle: 'italic',
-    letterSpacing: -0.1,
   },
   resultBox: {
     marginTop: 18,
@@ -375,7 +379,6 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: '700',
     fontFamily: font.numeric,
-    letterSpacing: -1,
     marginTop: 4,
   },
 });

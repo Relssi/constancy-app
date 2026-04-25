@@ -56,12 +56,23 @@ export function Tutorial({ visible, onFinish }: { visible: boolean; onFinish: ()
     }
   }
 
+  function handleClose() {
+    setStep(0);
+    onFinish();
+  }
+
   return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.backdrop}>
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent
+      onRequestClose={handleClose}
+      statusBarTranslucent
+    >
+      <Pressable style={styles.backdrop} onPress={handleClose}>
         {s.arrow === 'up' && <View style={[styles.arrowUp]}><Text style={styles.arrowText}>▲</Text></View>}
 
-        <View style={styles.bubbleWrap}>
+        <Pressable style={styles.bubbleWrap} onPress={() => {}}>
           <View style={styles.bubble}>
             <LinearGradient
               colors={['rgba(34,197,94,0.10)', 'rgba(255,255,255,0.02)'] as const}
@@ -104,10 +115,10 @@ export function Tutorial({ visible, onFinish }: { visible: boolean; onFinish: ()
               </Pressable>
             </View>
           </View>
-        </View>
+        </Pressable>
 
         {s.arrow === 'down' && <View style={[styles.arrowDown]}><Text style={styles.arrowText}>▼</Text></View>}
-      </View>
+      </Pressable>
     </Modal>
   );
 }

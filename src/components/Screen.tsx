@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, ViewStyle, Platform } from 'react-native';
+import { View, ScrollView, StyleSheet, ViewStyle, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/tokens';
@@ -10,11 +10,22 @@ type Props = {
   light?: boolean;
   style?: ViewStyle;
   noPadBottom?: boolean;
+  kbAvoid?: boolean;
 };
 
-export function Screen({ children, scroll = true, light, style, noPadBottom }: Props) {
+export function Screen({ children, scroll = true, light, style, noPadBottom, kbAvoid }: Props) {
   const bg = light ? colors.cream : colors.navy;
   const Wrap = scroll ? ScrollView : View;
+  const inner = (
+    <Wrap
+      contentContainerStyle={scroll ? [styles.content, noPadBottom && { paddingBottom: 20 }, style] : undefined}
+      style={!scroll ? [styles.content, style] : undefined}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps={scroll ? 'handled' : undefined}
+    >
+      {children}
+    </Wrap>
+  );
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: bg }]} edges={['top', 'left', 'right']}>
       {!light && (
@@ -35,13 +46,16 @@ export function Screen({ children, scroll = true, light, style, noPadBottom }: P
           />
         </>
       )}
-      <Wrap
-        contentContainerStyle={scroll ? [styles.content, noPadBottom && { paddingBottom: 20 }, style] : undefined}
-        style={!scroll ? [styles.content, style] : undefined}
-        showsVerticalScrollIndicator={false}
-      >
-        {children}
-      </Wrap>
+      {kbAvoid ? (
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          {inner}
+        </KeyboardAvoidingView>
+      ) : (
+        inner
+      )}
     </SafeAreaView>
   );
 }

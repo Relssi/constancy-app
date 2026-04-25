@@ -58,10 +58,12 @@ export default function Home() {
 
       <View style={{ gap: 6, marginTop: 2 }}>
         <Text style={styles.greetEyebrow}>{greet()}</Text>
-        <Text style={styles.name}>
-          {profile.name ?? 'Oi, tudo bem?'}{' '}
-          <Text style={{ color: colors.green, fontSize: 24 }}>✦</Text>
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
+          <Text style={styles.name} numberOfLines={2}>
+            {profile.name ?? 'Oi, tudo bem?'}
+          </Text>
+          <View style={styles.nameSpark} />
+        </View>
       </View>
 
       {failedToday && (
@@ -80,16 +82,25 @@ export default function Home() {
           <View style={styles.heroOrb} />
           <View style={styles.heroOrbSmall} />
           <View style={styles.heroHead}>
-            <Eyebrow text="Dias Seguidos" />
+            <View style={{ flexShrink: 1 }}>
+              <Eyebrow text="Dias Seguidos" />
+            </View>
             <View style={styles.tapHint}>
-              <Text style={styles.tapHintText}>ver progresso completo ›</Text>
+              <Text style={styles.tapHintText} numberOfLines={1}>ver progresso ›</Text>
             </View>
           </View>
           <View style={styles.streakRow}>
-            <Text style={styles.streakBig}>{streak}</Text>
-            <View style={{ marginBottom: 14, marginLeft: 10 }}>
+            <Text
+              style={styles.streakBig}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
+            >
+              {streak}
+            </Text>
+            <View style={{ marginBottom: 14, marginLeft: 10, flex: 1, flexShrink: 1 }}>
               <Text style={styles.streakUnit}>{streak === 1 ? 'dia' : 'dias'}</Text>
-              <Text style={styles.streakSub}>tomando a cápsula</Text>
+              <Text style={styles.streakSub} numberOfLines={2}>tomando a cápsula</Text>
             </View>
           </View>
 
@@ -223,7 +234,10 @@ export default function Home() {
                       <Text style={styles.mealTimeTxt}>{m.time}</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.mealName, d && { textDecorationLine: 'line-through', color: colors.textDim }]}>
+                      <Text
+                        style={[styles.mealName, d && { textDecorationLine: 'line-through', color: colors.textDim }]}
+                        numberOfLines={2}
+                      >
                         {m.name}
                       </Text>
                       {m.calories ? <Text style={styles.mealCal}>{m.calories} kcal</Text> : null}
@@ -310,11 +324,11 @@ export default function Home() {
 function MiniStat({ value, unit, label }: { value: string; unit: string; label: string }) {
   return (
     <View style={styles.miniStat}>
-      <Text style={styles.miniVal}>
+      <Text style={styles.miniVal} numberOfLines={1} adjustsFontSizeToFit>
         {value}
         {unit ? <Text style={styles.miniUnit}> {unit}</Text> : null}
       </Text>
-      <Text style={styles.miniLabel}>{label}</Text>
+      <Text style={styles.miniLabel} numberOfLines={2}>{label}</Text>
     </View>
   );
 }
@@ -459,7 +473,8 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     letterSpacing: -0.1,
   },
-  miniDivider: { width: 1, backgroundColor: colors.navyBorder, marginHorizontal: 10 },
+  miniDivider: { width: StyleSheet.hairlineWidth, backgroundColor: colors.navyBorderHi, marginHorizontal: 8 },
+  nameSpark: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.green, marginBottom: 6 },
   heroFoot: { color: colors.textMuted, fontSize: 13, marginTop: 18, lineHeight: 19, letterSpacing: -0.1 },
   heroFootStrong: { color: colors.green, fontWeight: '700', fontFamily: font.numeric },
   muted: {
@@ -556,7 +571,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: -0.2,
   },
-  mealRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  mealRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   mealTime: {
     minWidth: 60,
     paddingHorizontal: 10,

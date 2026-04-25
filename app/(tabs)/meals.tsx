@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useMemo } from 'react';
 import { Screen } from '../../src/components/Screen';
 import { Button } from '../../src/components/Button';
@@ -255,8 +255,16 @@ function MealForm({
   }
 
   return (
-    <View style={styles.modalBg}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+    <KeyboardAvoidingView
+      style={styles.modalBg}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+      <ScrollView
+        contentContainerStyle={styles.modalScroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.modalCard}>
           <Eyebrow text={initial ? 'Editar refeição' : 'Nova refeição'} />
           <Text style={styles.modalTitle}>
@@ -382,7 +390,7 @@ function MealForm({
         onCancel={() => setPickerOpen(false)}
         onPick={addItem}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -417,8 +425,16 @@ function ExtraForm({
   }
 
   return (
-    <View style={styles.modalBg}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+    <KeyboardAvoidingView
+      style={styles.modalBg}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+      <ScrollView
+        contentContainerStyle={styles.modalScroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.modalCard}>
           <Eyebrow text="Comi Algo Extra" />
           <Text style={styles.modalTitle}>Ninguém é{'\n'}de ferro.</Text>
@@ -439,8 +455,8 @@ function ExtraForm({
                 onPress={() => onSave(q.name, q.kcal)}
                 style={styles.quickChip}
               >
-                <Text style={styles.quickName}>{q.name}</Text>
-                <Text style={styles.quickKcal}>{q.kcal} kcal</Text>
+                <Text style={styles.quickName} numberOfLines={2}>{q.name}</Text>
+                <Text style={styles.quickKcal} numberOfLines={1}>{q.kcal} kcal</Text>
               </Pressable>
             ))}
           </View>
@@ -483,7 +499,7 @@ function ExtraForm({
         onCancel={() => setPickerOpen(false)}
         onPick={handlePick}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -657,14 +673,17 @@ const styles = StyleSheet.create({
   modalBg: {
     flex: 1,
     backgroundColor: 'rgba(5,14,31,0.85)',
+  },
+  modalScroll: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 22,
+    padding: 18,
+    paddingVertical: 40,
   },
   modalCard: {
     width: '100%',
     maxWidth: 520,
-    maxHeight: '90%',
     backgroundColor: colors.navy,
     borderRadius: radius.lg,
     borderWidth: 1,

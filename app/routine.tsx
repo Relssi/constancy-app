@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Modal, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Screen } from '../src/components/Screen';
@@ -88,7 +88,7 @@ export default function RoutineEditor() {
 
 function IconBtn({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
   return (
-    <Pressable onPress={onPress} disabled={disabled} style={[styles.iconBtn, disabled && { opacity: 0.3 }]}>
+    <Pressable onPress={onPress} disabled={disabled} hitSlop={8} style={[styles.iconBtn, disabled && { opacity: 0.3 }]}>
       <Text style={styles.iconBtnText}>{label}</Text>
     </Pressable>
   );
@@ -107,7 +107,16 @@ function RoutineForm({
   const [detail, setDetail] = useState(initial?.detail ?? '');
   const [time, setTime] = useState(initial?.time ?? '');
   return (
-    <View style={styles.modalBg}>
+    <KeyboardAvoidingView
+      style={styles.modalBg}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
+      <ScrollView
+        contentContainerStyle={styles.modalScroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       <View style={styles.modalCard}>
         <Eyebrow text={initial ? 'Editar etapa' : 'Nova etapa'} />
         <Text style={styles.modalTitle}>{initial ? 'Editar' : 'Adicionar'}{'\n'}na rotina.</Text>
@@ -149,7 +158,8 @@ function RoutineForm({
           </View>
         </View>
       </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -211,9 +221,13 @@ const styles = StyleSheet.create({
   modalBg: {
     flex: 1,
     backgroundColor: 'rgba(5,14,31,0.85)',
+  },
+  modalScroll: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 22,
+    padding: 18,
+    paddingVertical: 40,
   },
   modalCard: {
     width: '100%',
